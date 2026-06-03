@@ -1,0 +1,37 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Dashboard - PokeZOO Admin{% endblock %}
+{% block header_title %}Dashboard Overview{% endblock %}
+
+{% block admin_content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Stat Card 1 -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Total Pokémon</h3>
+        <p class="mt-2 text-3xl font-bold text-gray-900">{{ stats.pokemon_count }}</p>
+    </div>
+    
+    <!-- Stat Card 2 -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Habitats</h3>
+        <p class="mt-2 text-3xl font-bold text-gray-900">{{ stats.habitats_count }}</p>
+    </div>
+    
+    <!-- Stat Card 3 -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Keepers</h3>
+        <p class="mt-2 text-3xl font-bold text-gray-900">{{ stats.keepers_count }}</p>
+    </div>
+
+    <!-- Stat Card 4 -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Tickets Sold</h3>
+        <p class="mt-2 text-3xl font-bold text-gray-900">{{ stats.tickets_sold }}</p>
+    </div>
+</div>
+
+<div class="mt-8 bg-white rounded-lg shadow p-6">
+    <h3 class="text-lg font-bold">Welcome Admin!</h3>
+    <p class="mt-2 text-gray-600">Use the sidebar to navigate through the management modules.</p>
+</div>
+{% endblock %}

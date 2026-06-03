@@ -1,0 +1,88 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Manage Types - PokeZOO Admin{% endblock %}
+{% block header_title %}Manage Pokémon Types{% endblock %}
+
+{% block admin_content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Types List -->
+    <div class="lg:col-span-2 bg-white shadow rounded-lg overflow-hidden h-fit">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-bold">Registered Types</h3>
+        </div>
+        
+        {% if request.query_params.get('msg') == 'duplicate_error' %}
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
+            <p class="font-bold">Error</p>
+            <p>A type with this name already exists.</p>
+        </div>
+        {% elif request.query_params.get('msg') == 'in_use_error' %}
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
+            <p class="font-bold">Cannot Delete</p>
+            <p>This type is currently assigned to one or more species and cannot be deleted.</p>
+        </div>
+        {% elif request.query_params.get('msg') == 'csrf_error' %}
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
+            <p class="font-bold">Security Error</p>
+            <p>Invalid CSRF token.</p>
+        </div>
+        {% endif %}
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type Name</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for t in types_list %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ t.type_id }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ t.type_name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex items-center justify-end space-x-2">
+                                <a href="/admin/types?edit_id={{ t.type_id }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                <form action="/admin/types/delete/{{ t.type_id }}" method="POST" class="inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <button type="submit" class="text-red-600 hover:text-red-900">Remove</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="px-6 py-4 text-center text-gray-500 text-sm">No types found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Type Form -->
+    <div class="bg-white shadow rounded-lg overflow-hidden h-fit">
+        <div class="px-6 py-4 border-b border-gray-200 bg-red-50">
+            <h3 class="text-lg font-bold text-red-800">{% if edit_item %}Edit Type{% else %}Register New Type{% endif %}</h3>
+        </div>
+        <div class="p-6">
+            <form action="{% if edit_item %}/admin/types/edit/{{ edit_item.type_id }}{% else %}/admin/types/add{% endif %}" method="POST" class="grid grid-cols-1 gap-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Type Name</label>
+                    <input type="text" name="type_name" value="{{ edit_item.type_name if edit_item else '' }}" required placeholder="e.g. Fire" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 border p-2">
+                </div>
+                
+                <div class="pt-4 flex space-x-2">
+                    <button type="submit" class="flex-1 bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700">{% if edit_item %}Update Type{% else %}Add Type{% endif %}</button>
+                    {% if edit_item %}
+                    <a href="/admin/types" class="px-4 py-2 bg-gray-200 rounded text-gray-700 hover:bg-gray-300">Cancel</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

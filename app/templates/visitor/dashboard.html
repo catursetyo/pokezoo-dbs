@@ -1,0 +1,35 @@
+{% extends "visitor/layout.html" %}
+
+{% block title %}My Dashboard - PokeZOO{% endblock %}
+{% block header_title %}Welcome, {{ visitor.name }}!{% endblock %}
+
+{% block visitor_content %}
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+        <h3 class="text-lg font-bold">My Tickets</h3>
+        <a href="/visitor/tickets/buy" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm">Buy New Ticket</a>
+    </div>
+    <ul class="divide-y divide-gray-200">
+        {% for t in tickets %}
+        <li class="px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-bold text-gray-900">Ticket #{{ t.ticket_id }} - {{ t.ticket_type }}</p>
+                    <p class="text-sm text-gray-500">Visit Date: {{ t.visit_date }}</p>
+                </div>
+                <div>
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        {% if t.status == 'active' %}bg-green-100 text-green-800
+                        {% elif t.status == 'used' %}bg-gray-100 text-gray-800
+                        {% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ t.status|capitalize }}
+                    </span>
+                </div>
+            </div>
+        </li>
+        {% else %}
+        <li class="px-6 py-4 text-center text-sm text-gray-500">You don't have any tickets yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

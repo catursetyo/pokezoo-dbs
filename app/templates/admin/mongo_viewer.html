@@ -1,0 +1,42 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}MongoDB Viewer - PokeZOO Admin{% endblock %}
+{% block header_title %}MongoDB Viewer{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold">Select Collection</h3>
+    </div>
+    <div class="p-6">
+        <form action="/admin/mongo-viewer" method="GET" class="flex gap-4 items-center">
+            <select name="collection" class="block w-64 rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 border p-2 bg-white">
+                {% for coll in collections %}
+                <option value="{{ coll }}" {% if current_collection == coll %}selected{% endif %}>{{ coll }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">View Data</button>
+        </form>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold">Documents in <span class="text-green-600">{{ current_collection }}</span></h3>
+        <p class="text-sm text-gray-500">Showing top 50 recent documents.</p>
+    </div>
+    <div class="p-6">
+        {% if documents %}
+            <div class="space-y-6">
+                {% for doc in documents %}
+                <div class="bg-gray-50 rounded p-4 border border-gray-200 font-mono text-sm overflow-x-auto">
+                    <pre>{{ doc | tojson(indent=2) }}</pre>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 italic">No documents found in this collection.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Manage Keepers - PokeZOO Admin{% endblock %}
+{% block header_title %}Manage Keepers{% endblock %}
+
+{% block admin_content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Keeper List -->
+    <div class="lg:col-span-2 bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-bold">All Keepers</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name (User)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned Pokémon</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for k in keepers %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ k.name }} <span class="text-gray-400 text-xs">({{ k.username }})</span></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ k.shift }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ k.phone_number }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ k.assigned_count }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div class="flex items-center justify-end space-x-2">
+                                <a href="/admin/keepers?edit_id={{ k.keeper_id }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                <form action="/admin/keepers/delete/{{ k.keeper_id }}" method="POST" class="inline" onsubmit="return confirm('Delete this keeper? Their user account will also be removed!');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <button type="submit" class="text-red-600 hover:text-red-900">Remove</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500 text-sm">No keepers found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Keeper Form -->
+    <div class="bg-white shadow rounded-lg overflow-hidden h-fit">
+        <div class="px-6 py-4 border-b border-gray-200 bg-blue-50">
+            <h3 class="text-lg font-bold text-blue-800">{% if edit_item %}Edit Keeper{% else %}Add New Keeper{% endif %}</h3>
+        </div>
+        <div class="p-6">
+            <form action="{% if edit_item %}/admin/keepers/edit/{{ edit_item.keeper_id }}{% else %}/admin/keepers/add{% endif %}" method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                
+                <h4 class="font-bold text-sm text-gray-700 border-b pb-1">Login Credentials</h4>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" name="username" value="{{ edit_item.username if edit_item else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Password {% if edit_item %}<span class="text-gray-400 text-xs font-normal">(Leave blank to keep current)</span>{% endif %}</label>
+                    <input type="password" name="password" {% if not edit_item %}required{% endif %} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                </div>
+                
+                <h4 class="font-bold text-sm text-gray-700 border-b pb-1 mt-6">Keeper Details</h4>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input type="text" name="name" value="{{ edit_item.name if edit_item else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Shift</label>
+                    <select name="shift" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 bg-white">
+                        <option value="Morning" {% if edit_item and edit_item.shift == 'Morning' %}selected{% endif %}>Morning</option>
+                        <option value="Afternoon" {% if edit_item and edit_item.shift == 'Afternoon' %}selected{% endif %}>Afternoon</option>
+                        <option value="Night" {% if edit_item and edit_item.shift == 'Night' %}selected{% endif %}>Night</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input type="text" name="phone_number" value="{{ edit_item.phone_number if edit_item else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+                </div>
+                
+                <div class="pt-4 flex space-x-2">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">{% if edit_item %}Update Keeper{% else %}Add Keeper{% endif %}</button>
+                    {% if edit_item %}
+                    <a href="/admin/keepers" class="px-4 py-2 bg-gray-200 rounded text-gray-700 hover:bg-gray-300">Cancel</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

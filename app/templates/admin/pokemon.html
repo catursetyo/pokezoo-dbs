@@ -1,0 +1,137 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Manage Pokémon - PokeZOO Admin{% endblock %}
+{% block header_title %}Manage Pokémon{% endblock %}
+
+{% block admin_content %}
+<div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold">{% if edit_item %}Edit Pokémon{% else %}Add New Pokémon{% endif %}</h3>
+    </div>
+    
+    {% if request.query_params.get('msg') == 'duplicate_error' %}
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
+        <p class="font-bold">Error</p>
+        <p>A Pokémon with that nickname already exists! Nicknames must be unique.</p>
+    </div>
+    {% endif %}
+
+    <div class="p-6">
+        <form action="{% if edit_item %}/admin/pokemon/edit/{{ edit_item.pokemon_id }}{% else %}/admin/pokemon/add{% endif %}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Nickname</label>
+                <input type="text" name="nickname" value="{{ edit_item.nickname if edit_item else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
+            </div>
+            
+
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Species</label>
+                <select name="species_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 bg-white">
+                    {% for sp in species %}
+                    <option value="{{ sp.species_id }}" {% if edit_item and edit_item.species_id == sp.species_id %}selected{% endif %}>{{ sp.species_name }} - {{ sp.types_str if sp.types_str else 'No Type' }} - {{ sp.rarity }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Habitat</label>
+                <select name="habitat_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 bg-white">
+                    {% for h in habitats %}
+                    <option value="{{ h.habitat_id }}" {% if edit_item and edit_item.habitat_id == h.habitat_id %}selected{% endif %}>{{ h.habitat_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Assign Keeper</label>
+                <select name="keeper_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 bg-white">
+                    {% for k in keepers %}
+                    <option value="{{ k.keeper_id }}" {% if edit_item and edit_item.keeper_id == k.keeper_id %}selected{% endif %}>{{ k.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            {% if edit_item %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Health Status</label>
+                <select name="health_status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 bg-white">
+                    <option value="healthy" {% if edit_item.health_status == 'healthy' %}selected{% endif %}>Healthy</option>
+                    <option value="sick" {% if edit_item.health_status == 'sick' %}selected{% endif %}>Sick</option>
+                    <option value="injured" {% if edit_item.health_status == 'injured' %}selected{% endif %}>Injured</option>
+                    <option value="critical" {% if edit_item.health_status == 'critical' %}selected{% endif %}>Critical</option>
+                    <option value="quarantined" {% if edit_item.health_status == 'quarantined' %}selected{% endif %}>Quarantined</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Status</label>
+                <select name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 bg-white">
+                    <option value="active" {% if edit_item.status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="transferred" {% if edit_item.status == 'transferred' %}selected{% endif %}>Transferred</option>
+                    <option value="maintenance" {% if edit_item.status == 'maintenance' %}selected{% endif %}>Maintenance</option>
+                </select>
+            </div>
+            {% endif %}
+            
+            <div class="md:col-span-2 pt-4 flex space-x-2">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">{% if edit_item %}Update Pokémon{% else %}Add Pokémon{% endif %}</button>
+                {% if edit_item %}
+                <a href="/admin/pokemon" class="bg-gray-500 text-white px-4 py-2 rounded shadow hover:bg-gray-600">Cancel</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nickname</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Species</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Habitat</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lvl</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Health</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            {% for p in pokemon_list %}
+            <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ p.pokemon_id }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ p.nickname }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ p.species_name }} - {{ p.types_str if p.types_str else 'No Type' }} - {{ p.rarity }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ p.habitat_name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ p.level }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        {% if p.health_status == 'healthy' %}bg-green-100 text-green-800
+                        {% elif p.health_status == 'sick' %}bg-yellow-100 text-yellow-800
+                        {% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ p.health_status }}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ p.status }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div class="flex items-center justify-end space-x-2">
+                        <a href="/admin/pokemon?edit_id={{ p.pokemon_id }}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                        <form action="/admin/pokemon/delete/{{ p.pokemon_id }}" method="POST" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="text-red-600 hover:text-red-900">Remove</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">No Pokémon found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

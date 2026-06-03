@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    <!-- Sidebar -->
+    <div class="w-64 bg-gray-800 text-white flex flex-col">
+        <div class="flex items-center justify-center h-16 border-b border-gray-700">
+            <span class="text-xl font-bold uppercase tracking-wider">Admin Panel</span>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+            <nav class="mt-4 px-2 space-y-1">
+                <a href="/admin/dashboard" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-700">Dashboard</a>
+                <a href="/admin/types" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-red-700">Manage Types</a>
+                <a href="/admin/species" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-blue-700">Manage Species</a>
+                <a href="/admin/pokemon" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-blue-700">Manage Pokémon</a>
+                <a href="/admin/habitats" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-blue-700">Manage Habitats</a>
+                <a href="/admin/keepers" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-blue-700">Manage Keepers</a>
+                <a href="/admin/foods" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-yellow-600">Manage Foods</a>
+                <a href="/admin/schedules" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-yellow-600">Feeding Schedules</a>
+                <a href="/admin/playground" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-blue-700">SQL Playground</a>
+                <a href="/admin/mongo-viewer" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md hover:bg-gray-700 text-green-400">MongoDB Viewer</a>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-gray-700">
+            <a href="/auth/logout" class="block w-full text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">Logout</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-hidden">
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                <h1 class="text-2xl font-bold leading-tight text-gray-900">{% block header_title %}Admin{% endblock %}</h1>
+            </div>
+        </header>
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+            {% block admin_content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}

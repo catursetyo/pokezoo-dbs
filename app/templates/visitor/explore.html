@@ -1,0 +1,25 @@
+{% extends "visitor/layout.html" %}
+
+{% block title %}Explore Habitats - PokeZOO{% endblock %}
+{% block header_title %}Explore Habitats{% endblock %}
+
+{% block visitor_content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for h in habitats %}
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="h-32 bg-indigo-100 flex items-center justify-center">
+            <span class="text-4xl">🏞️</span>
+        </div>
+        <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900">{{ h.habitat_name }}</h3>
+            <p class="mt-2 text-sm text-gray-500">Type: <span class="font-medium text-indigo-600">{{ h.habitat_type }}</span></p>
+            <p class="mt-1 text-sm text-gray-500">Current Population: <span class="font-bold">{{ h.pop }}</span> Pokémon</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-span-3 text-center py-8 text-gray-500">
+        No active habitats to display right now. Check back later!
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

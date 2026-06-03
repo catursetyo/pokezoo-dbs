@@ -1,0 +1,44 @@
+{% extends "visitor/layout.html" %}
+
+{% block title %}Buy Tickets - PokeZOO{% endblock %}
+{% block header_title %}Purchase Tickets{% endblock %}
+
+{% block visitor_content %}
+<div class="bg-white rounded-lg shadow overflow-hidden max-w-2xl mx-auto border-t-4 border-indigo-500">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-indigo-600">Buy Tickets</h3>
+        <p class="text-sm text-gray-500">Select your ticket type and visit date.</p>
+    </div>
+    <div class="p-6">
+        <form action="/visitor/tickets/buy" method="POST" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Ticket Type</label>
+                <select name="ticket_type" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white">
+                    <option value="General Admission">General Admission ($25.00)</option>
+                    <option value="VIP Pass">VIP Pass ($75.00)</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Visit Date</label>
+                <input type="date" name="visit_date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Payment Method</label>
+                <select name="payment_method" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white">
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="PayPal">PayPal</option>
+                </select>
+            </div>
+
+            <div class="pt-4">
+                <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 font-bold">Purchase Ticket</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

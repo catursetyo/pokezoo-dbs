@@ -1,0 +1,56 @@
+{% extends "keeper/layout.html" %}
+
+{% block title %}Incident Reports - PokeZOO Keeper{% endblock %}
+{% block header_title %}Report an Incident{% endblock %}
+
+{% block keeper_content %}
+<div class="bg-white rounded-lg shadow overflow-hidden max-w-2xl mx-auto border-t-4 border-red-500">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-red-600">New Incident Report</h3>
+        <p class="text-sm text-gray-500">Submit severe issues. Stored in MongoDB incident_reports collection.</p>
+    </div>
+    <div class="p-6">
+        <form action="/keeper/incidents" method="POST" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Habitat Involved</label>
+                    <select name="habitat_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white">
+                        {% for h in habitats %}
+                        <option value="{{ h.habitat_id }}">{{ h.habitat_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Pokémon ID (Optional)</label>
+                    <input type="number" name="pokemon_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Severity</label>
+                <select name="severity" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white">
+                    <option value="low">Low - Minor Issue</option>
+                    <option value="medium">Medium - Needs Attention</option>
+                    <option value="high">High - Dangerous/Critical</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea name="description" rows="3" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Describe what happened..."></textarea>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Actions Taken</label>
+                <input type="text" name="actions_taken" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="e.g. Secured area, called vet (comma separated)">
+            </div>
+
+            <div class="pt-4">
+                <button type="submit" class="w-full bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700 font-bold">Submit Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
