@@ -21,7 +21,11 @@ async def list_schedules(request: Request):
     
     pokemon_list = execute_query("SELECT pokemon_id, nickname FROM pokemon ORDER BY nickname")
     keepers_list = execute_query("SELECT keeper_id, name FROM keepers ORDER BY name")
-    foods_list = execute_query("SELECT food_id, food_name, stock FROM foods ORDER BY food_name")
+    foods_list = execute_query("""
+        SELECT food_id, food_name, stock
+        FROM foods
+        ORDER BY food_name
+    """)
     
     edit_id = request.query_params.get("edit_id")
     edit_item = None
@@ -51,29 +55,38 @@ async def add_schedule(
     pokemon_id: int = Form(...),
     keeper_id: int = Form(...),
     food_id: int = Form(...),
-    feeding_time: str = Form(...) # datetime-local format from HTML
+    feeding_time: str = Form(...)
 ):
     session_csrf = request.session.get("csrf_token")
     form_data = await request.form()
     request_csrf = form_data.get("csrf_token")
+
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/schedules?msg=csrf_error", status_code=303)
 
     try:
+        food_rows = execute_query(
+            "SELECT stock FROM foods WHERE food_id = %s",
+            (food_id,)
+        )
+
+        if not food_rows or food_rows[0]["stock"] <= 0:
+            return RedirectResponse(url="/admin/schedules?msg=stock_error", status_code=303)
+
         mysql_time = feeding_time.replace("T", " ") + ":00"
-        
+
         execute_query(
-            "INSERT INTO feeding_schedules (pokemon_id, keeper_id, food_id, feeding_time) VALUES (%s, %s, %s, %s)",
+            """
+            INSERT INTO feeding_schedules 
+            (pokemon_id, keeper_id, food_id, feeding_time)
+            VALUES (%s, %s, %s, %s)
+            """,
             (pokemon_id, keeper_id, food_id, mysql_time)
         )
-    except Exception as e:
-        return RedirectResponse(url="/admin/schedules?msg=error", status_code=303)
-        
-    return RedirectResponse(url="/admin/schedules", status_code=303)
 
-@router.post("/delete/{feeding_id}")
-async def delete_schedule(request: Request, feeding_id: int):
-    execute_query("DELETE FROM feeding_schedules WHERE feeding_id = %s", (feeding_id,))
+    except Exception:
+        return RedirectResponse(url="/admin/schedules?msg=error", status_code=303)
+
     return RedirectResponse(url="/admin/schedules", status_code=303)
 
 @router.post("/edit/{feeding_id}")
@@ -89,19 +102,37 @@ async def edit_schedule(
     session_csrf = request.session.get("csrf_token")
     form_data = await request.form()
     request_csrf = form_data.get("csrf_token")
+
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/schedules?msg=csrf_error", status_code=303)
 
     try:
+        food_rows = execute_query(
+            "SELECT stock FROM foods WHERE food_id = %s",
+            (food_id,)
+        )
+
+        if not food_rows or food_rows[0]["stock"] <= 0:
+            return RedirectResponse(url="/admin/schedules?msg=stock_error", status_code=303)
+
         mysql_time = feeding_time.replace("T", " ")
-        if len(mysql_time) == 16: # missing seconds
+        if len(mysql_time) == 16:
             mysql_time += ":00"
-            
+
         execute_query(
-            "UPDATE feeding_schedules SET pokemon_id = %s, keeper_id = %s, food_id = %s, feeding_time = %s, status = %s WHERE feeding_id = %s",
+            """
+            UPDATE feeding_schedules
+            SET pokemon_id = %s,
+                keeper_id = %s,
+                food_id = %s,
+                feeding_time = %s,
+                status = %s
+            WHERE feeding_id = %s
+            """,
             (pokemon_id, keeper_id, food_id, mysql_time, status, feeding_id)
         )
-    except Exception as e:
+
+    except Exception:
         return RedirectResponse(url="/admin/schedules?msg=error", status_code=303)
-        
+
     return RedirectResponse(url="/admin/schedules", status_code=303)

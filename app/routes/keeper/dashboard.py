@@ -50,10 +50,14 @@ async def dashboard(request: Request):
 @router.post("/feedings/update/{feeding_id}")
 async def update_feeding(request: Request, feeding_id: int, status: str = Form(...)):
     user_id = request.session.get("user_id")
-    keeper_row = execute_query("SELECT keeper_id FROM keepers WHERE user_id = %s", (user_id,))
+    keeper_row = execute_query(
+        "SELECT keeper_id FROM keepers WHERE user_id = %s",
+        (user_id,)
+    )
 
     if keeper_row:
-        keeper_id = keeper_row[0]['keeper_id']
+        keeper_id = keeper_row[0]["keeper_id"]
+
         try:
             execute_query("""
                 UPDATE feeding_schedules
@@ -61,6 +65,9 @@ async def update_feeding(request: Request, feeding_id: int, status: str = Form(.
                 WHERE feeding_id = %s AND keeper_id = %s
             """, (status, feeding_id, keeper_id))
         except Exception:
-            return RedirectResponse(url="/keeper/dashboard?msg=stock_error", status_code=303)
+            return RedirectResponse(
+                url="/keeper/dashboard?msg=stock_error",
+                status_code=303
+            )
 
     return RedirectResponse(url="/keeper/dashboard", status_code=303)

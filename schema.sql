@@ -170,13 +170,36 @@ CREATE TABLE pokemon_interactions (
 CREATE INDEX idx_interaction_ticket ON pokemon_interactions(ticket_id);
 CREATE INDEX idx_interaction_pokemon ON pokemon_interactions(pokemon_id);
 
+DROP TRIGGER IF EXISTS before_feeding_schedule_insert;
+DROP TRIGGER IF EXISTS before_feeding_schedule_update;
+DROP TRIGGER IF EXISTS after_feeding_completed;
+
 DELIMITER //
 
-CREATE TRIGGER before_feeding_completed
+CREATE TRIGGER before_feeding_schedule_insert
+BEFORE INSERT ON feeding_schedules
+FOR EACH ROW
+BEGIN
+    IF (SELECT stock FROM foods WHERE food_id = NEW.food_id) <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Food stock is empty, cannot assign feeding schedule';
+    END IF;
+END; //
+
+CREATE TRIGGER before_feeding_schedule_update
 BEFORE UPDATE ON feeding_schedules
 FOR EACH ROW
 BEGIN
-    IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
+    -- Jika admin mengganti food pada schedule
+    IF NEW.food_id <> OLD.food_id THEN
+        IF (SELECT stock FROM foods WHERE food_id = NEW.food_id) <= 0 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Food stock is empty, cannot assign feeding schedule';
+        END IF;
+    END IF;
+
+    -- Jika keeper/admin menandai feeding sebagai completed
+    IF NEW.status = 'completed' AND OLD.status <> 'completed' THEN
         IF (SELECT stock FROM foods WHERE food_id = NEW.food_id) <= 0 THEN
             SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Food stock is not enough';
@@ -188,30 +211,10 @@ CREATE TRIGGER after_feeding_completed
 AFTER UPDATE ON feeding_schedules
 FOR EACH ROW
 BEGIN
-    IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
+    IF NEW.status = 'completed' AND OLD.status <> 'completed' THEN
         UPDATE foods
         SET stock = stock - 1
         WHERE food_id = NEW.food_id;
-    END IF;
-END; //
-
-CREATE TRIGGER before_keeper_insert
-BEFORE INSERT ON keepers
-FOR EACH ROW
-BEGIN
-    IF (SELECT role FROM users WHERE user_id = NEW.user_id) != 'keeper' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'User role must be keeper';
-    END IF;
-END; //
-
-CREATE TRIGGER before_visitor_insert
-BEFORE INSERT ON visitors
-FOR EACH ROW
-BEGIN
-    IF (SELECT role FROM users WHERE user_id = NEW.user_id) != 'visitor' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'User role must be visitor';
     END IF;
 END; //
 
