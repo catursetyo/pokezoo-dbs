@@ -283,13 +283,14 @@ async def get_reviews_page(request: Request):
 async def create_review(
     request: Request,
     rating: int = Form(...),
-    comment: str = Form(...),
+    comment: str = Form(""),
     favorite_habitat: str = Form(...)
 ):
-    visitor = get_visitor_profile(request)
-
-    if not visitor:
-        return HTMLResponse("Visitor profile not found.", status_code=404)
+    user_id = request.session.get("user_id")
+    visitor = execute_query(
+        "SELECT visitor_id FROM visitors WHERE user_id = %s",
+        (user_id,)
+    )[0]
 
     db = await get_mongo_db()
     reviews_col = db["visitor_reviews"]
@@ -297,7 +298,7 @@ async def create_review(
     review_doc = {
         "visitor_id": visitor["visitor_id"],
         "rating": rating,
-        "comment": comment,
+        "comment": comment.strip() if comment else "",
         "favorite_habitat": favorite_habitat,
         "date_submitted": datetime.utcnow().isoformat()
     }
