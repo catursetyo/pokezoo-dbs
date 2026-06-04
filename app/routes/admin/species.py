@@ -59,6 +59,9 @@ async def add_species(
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/species?msg=csrf_error", status_code=303)
         
+    if not type_ids:
+        return RedirectResponse(url="/admin/species?msg=type_required_error", status_code=303)
+        
     existing = execute_query(
         "SELECT species_id FROM pokemon_species WHERE LOWER(species_name) = LOWER(%s)",
         (species_name,)
@@ -111,6 +114,9 @@ async def edit_species(
     request_csrf = form_data.get("csrf_token")
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/species?msg=csrf_error", status_code=303)
+
+    if not type_ids:
+        return RedirectResponse(url="/admin/species?msg=type_required_error", status_code=303)
 
     existing = execute_query(
         "SELECT species_id FROM pokemon_species WHERE LOWER(species_name) = LOWER(%s) AND species_id != %s",

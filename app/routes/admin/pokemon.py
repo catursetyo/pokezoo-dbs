@@ -98,6 +98,13 @@ async def add_pokemon(
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/pokemon?msg=csrf_error", status_code=303)
 
+    if not keeper_ids:
+        return RedirectResponse(url="/admin/pokemon?msg=keeper_required_error", status_code=303)
+
+    habitat_info = execute_query("SELECT capacity, (SELECT COUNT(*) FROM pokemon WHERE habitat_id = %s) as current_count FROM habitats WHERE habitat_id = %s", (habitat_id, habitat_id))
+    if habitat_info and habitat_info[0]['current_count'] >= habitat_info[0]['capacity']:
+        return RedirectResponse(url="/admin/pokemon?msg=capacity_error", status_code=303)
+
     existing = execute_query(
         "SELECT pokemon_id FROM pokemon WHERE LOWER(nickname) = LOWER(%s)",
         (nickname,)
@@ -149,6 +156,15 @@ async def edit_pokemon(
     request_csrf = form_data.get("csrf_token")
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/pokemon?msg=csrf_error", status_code=303)
+
+    if not keeper_ids:
+        return RedirectResponse(url="/admin/pokemon?msg=keeper_required_error", status_code=303)
+
+    old_poke = execute_query("SELECT habitat_id FROM pokemon WHERE pokemon_id = %s", (pokemon_id,))
+    if old_poke and old_poke[0]['habitat_id'] != habitat_id:
+        habitat_info = execute_query("SELECT capacity, (SELECT COUNT(*) FROM pokemon WHERE habitat_id = %s) as current_count FROM habitats WHERE habitat_id = %s", (habitat_id, habitat_id))
+        if habitat_info and habitat_info[0]['current_count'] >= habitat_info[0]['capacity']:
+            return RedirectResponse(url="/admin/pokemon?msg=capacity_error", status_code=303)
 
     existing = execute_query(
         "SELECT pokemon_id FROM pokemon WHERE LOWER(nickname) = LOWER(%s) AND pokemon_id != %s",
