@@ -1,33 +1,103 @@
 {% extends "visitor/layout.html" %}
+
 {% block title %}My Dashboard - PokeZOO{% endblock %}
 {% block header_title %}Welcome, {{ visitor.name }}!{% endblock %}
+
 {% block visitor_content %}
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h3 class="text-lg font-bold">My Tickets</h3>
-        <a href="/visitor/tickets/buy" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm">Buy New Ticket</a>
-    </div>
-    <ul class="divide-y divide-gray-200">
-        {% for t in tickets %}
-        <li class="px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-bold text-gray-900">Ticket #{{ t.ticket_id }} - {{ t.ticket_type }}</p>
-                    <p class="text-sm text-gray-500">Visit Date: {{ t.visit_date }}</p>
-                </div>
-                <div>
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        {% if t.status == 'active' %}bg-green-100 text-green-800
-                        {% elif t.status == 'used' %}bg-gray-100 text-gray-800
-                        {% else %}bg-red-100 text-red-800{% endif %}">
-                        {{ t.status|capitalize }}
-                    </span>
-                </div>
-            </div>
-        </li>
-        {% else %}
-        <li class="px-6 py-4 text-center text-sm text-gray-500">You don't have any tickets yet.</li>
-        {% endfor %}
-    </ul>
+
+{% if request.query_params.get('msg') == 'review_submitted' %}
+<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+    <p class="font-bold">Success</p>
+    <p>Your review has been submitted.</p>
 </div>
+{% endif %}
+
+<div class="bg-white rounded-lg shadow p-6 mb-8">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold">My Tickets</h3>
+        <a href="/visitor/tickets/buy"
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Buy New Ticket
+        </a>
+    </div>
+
+    <div class="space-y-3">
+        {% for t in tickets %}
+        <div class="border border-gray-200 rounded p-4 flex justify-between items-center">
+            <div>
+                <p class="font-semibold">Ticket #{{ t.ticket_id }} - {{ t.ticket_type }}</p>
+                <p class="text-sm text-gray-500">Visit Date: {{ t.visit_date }}</p>
+                <p class="text-sm text-gray-500">Price: ${{ t.price }}</p>
+            </div>
+
+            <span class="px-3 py-1 text-xs rounded-full
+                {% if t.status == 'active' %}
+                    bg-green-100 text-green-800
+                {% elif t.status == 'used' %}
+                    bg-gray-100 text-gray-800
+                {% else %}
+                    bg-red-100 text-red-800
+                {% endif %}">
+                {{ t.status|capitalize }}
+            </span>
+        </div>
+        {% else %}
+        <p class="text-gray-500 italic">You don't have any tickets yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold">My Pokémon Interactions</h3>
+        <a href="/visitor/explore"
+           class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+            Explore Zoo
+        </a>
+    </div>
+
+    <div class="space-y-3">
+        {% for i in interactions %}
+        <div class="border border-gray-200 rounded p-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="font-semibold">
+                        {{ i.interaction_type|replace('_', ' ')|title }}
+                        with {{ i.nickname if i.nickname else i.species_name }}
+                    </p>
+
+                    <p class="text-sm text-gray-500">
+                        {{ i.species_name }} -
+                        {{ i.types_str if i.types_str else 'No Type' }} -
+                        {{ i.rarity }}
+                    </p>
+
+                    <p class="text-sm text-gray-500">
+                        Habitat: {{ i.habitat_name if i.habitat_name else 'Unknown' }}
+                    </p>
+
+                    <p class="text-sm text-gray-500">
+                        Ticket #{{ i.ticket_id }} | Visit Date: {{ i.visit_date }}
+                    </p>
+                </div>
+
+                <span class="text-xs text-gray-400">
+                    {{ i.interaction_time }}
+                </span>
+            </div>
+
+            {% if i.notes %}
+            <p class="mt-2 text-sm text-gray-600">
+                Notes: {{ i.notes }}
+            </p>
+            {% endif %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 italic">
+            You haven't interacted with any Pokémon yet.
+        </p>
+        {% endfor %}
+    </div>
+</div>
+
 {% endblock %}

@@ -1,0 +1,124 @@
+{% extends "visitor/layout.html" %}
+
+{% block title %}{{ habitat.habitat_name }} - PokeZOO{% endblock %}
+{% block header_title %}{{ habitat.habitat_name }}{% endblock %}
+
+{% block visitor_content %}
+
+{% if request.query_params.get('msg') == 'interaction_success' %}
+<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+    <p class="font-bold">Success</p>
+    <p>Your interaction has been recorded.</p>
+</div>
+{% endif %}
+
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h3 class="text-xl font-bold mb-2">Habitat Information</h3>
+    <p class="text-gray-600">
+        <span class="font-semibold">Type:</span> {{ habitat.habitat_type }}
+    </p>
+    <p class="text-gray-600">
+        <span class="font-semibold">Capacity:</span> {{ habitat.capacity }}
+    </p>
+    <p class="text-gray-600">
+        <span class="font-semibold">Status:</span> {{ habitat.status }}
+    </p>
+</div>
+
+{% if not active_tickets %}
+<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
+    <p class="font-bold">No Active Ticket</p>
+    <p>You need an active ticket before interacting with Pokémon.</p>
+    <a href="/visitor/tickets/buy" class="inline-block mt-2 text-blue-700 font-semibold hover:underline">
+        Buy a ticket
+    </a>
+</div>
+{% endif %}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for p in pokemon_list %}
+    <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div class="flex justify-between items-start mb-3">
+            <div>
+                <h3 class="text-xl font-bold text-gray-900">
+                    {{ p.nickname if p.nickname else p.species_name }}
+                </h3>
+                <p class="text-sm text-gray-500">
+                    {{ p.species_name }} -
+                    {{ p.types_str if p.types_str else 'No Type' }} -
+                    {{ p.rarity }}
+                </p>
+            </div>
+
+            <span class="px-2 py-1 text-xs rounded-full
+                {% if p.health_status == 'healthy' %}
+                    bg-green-100 text-green-800
+                {% elif p.health_status == 'sick' %}
+                    bg-yellow-100 text-yellow-800
+                {% else %}
+                    bg-red-100 text-red-800
+                {% endif %}">
+                {{ p.health_status }}
+            </span>
+        </div>
+
+        {% if active_tickets %}
+        <form action="/visitor/interactions/add" method="POST" class="space-y-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="pokemon_id" value="{{ p.pokemon_id }}">
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Ticket</label>
+                <select name="ticket_id" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white">
+                    {% for t in active_tickets %}
+                    <option value="{{ t.ticket_id }}">
+                        Ticket #{{ t.ticket_id }} - {{ t.ticket_type }} - {{ t.visit_date }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Interaction Type</label>
+                <select name="interaction_type" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white">
+                    <option value="photo">Photo</option>
+                    <option value="feeding">Feeding</option>
+                    <option value="show">Show</option>
+                    <option value="battle_event">Battle Event</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Notes</label>
+                <textarea name="notes" rows="2"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
+                          placeholder="Optional notes..."></textarea>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Record Interaction
+            </button>
+        </form>
+        {% else %}
+        <p class="text-sm text-gray-400 italic">
+            Buy an active ticket to interact with this Pokémon.
+        </p>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="col-span-full bg-white rounded-lg shadow p-6 text-center text-gray-500">
+        No active Pokémon in this habitat.
+    </div>
+    {% endfor %}
+</div>
+
+<div class="mt-6">
+    <a href="/visitor/explore" class="text-blue-600 hover:underline">
+        ← Back to Explore Zoo
+    </a>
+</div>
+
+{% endblock %}

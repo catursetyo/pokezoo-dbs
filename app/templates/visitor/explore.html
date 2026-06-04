@@ -1,23 +1,55 @@
 {% extends "visitor/layout.html" %}
+
 {% block title %}Explore Habitats - PokeZOO{% endblock %}
 {% block header_title %}Explore Habitats{% endblock %}
+
 {% block visitor_content %}
+
+{% if request.query_params.get('msg') == 'invalid_ticket' %}
+<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+    <p class="font-bold">Invalid Ticket</p>
+    <p>You need an active ticket before interacting with Pokémon.</p>
+</div>
+{% endif %}
+
+{% if request.query_params.get('msg') == 'invalid_pokemon' %}
+<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+    <p class="font-bold">Invalid Pokémon</p>
+    <p>This Pokémon is not available for interaction.</p>
+</div>
+{% endif %}
+
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for h in habitats %}
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="h-32 bg-indigo-100 flex items-center justify-center">
-            <span class="text-4xl">🏞️</span>
-        </div>
-        <div class="p-6">
-            <h3 class="text-xl font-bold text-gray-900">{{ h.habitat_name }}</h3>
-            <p class="mt-2 text-sm text-gray-500">Type: <span class="font-medium text-indigo-600">{{ h.habitat_type }}</span></p>
-            <p class="mt-1 text-sm text-gray-500">Current Population: <span class="font-bold">{{ h.pop }}</span> Pokémon</p>
-        </div>
+    <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <div class="text-4xl mb-3">🌿</div>
+
+        <h3 class="text-xl font-bold text-gray-900 mb-2">
+            {{ h.habitat_name }}
+        </h3>
+
+        <p class="text-sm text-gray-600 mb-1">
+            <span class="font-semibold">Type:</span> {{ h.habitat_type }}
+        </p>
+
+        <p class="text-sm text-gray-600 mb-1">
+            <span class="font-semibold">Capacity:</span> {{ h.capacity }}
+        </p>
+
+        <p class="text-sm text-gray-600 mb-4">
+            <span class="font-semibold">Current Population:</span> {{ h.pop }} Pokémon
+        </p>
+
+        <a href="/visitor/habitats/{{ h.habitat_id }}"
+           class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            View Pokémon
+        </a>
     </div>
     {% else %}
-    <div class="col-span-3 text-center py-8 text-gray-500">
+    <div class="col-span-full bg-white rounded-lg shadow p-6 text-center text-gray-500">
         No active habitats to display right now. Check back later!
     </div>
     {% endfor %}
 </div>
+
 {% endblock %}
