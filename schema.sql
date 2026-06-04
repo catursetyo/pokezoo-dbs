@@ -57,7 +57,7 @@ CREATE TABLE habitats (
     habitat_id INT AUTO_INCREMENT PRIMARY KEY,
     habitat_name VARCHAR(100) NOT NULL UNIQUE,
     habitat_type VARCHAR(50),
-    capacity INT NOT NULL,
+    capacity INT NOT NULL CHECK (capacity > 0),
     status ENUM('active', 'maintenance', 'closed') NOT NULL DEFAULT 'active'
 );
 
@@ -67,7 +67,6 @@ CREATE TABLE pokemon (
     species_id INT NOT NULL,
     habitat_id INT,
     nickname VARCHAR(100) UNIQUE,
-    level INT DEFAULT 1,
     health_status ENUM('healthy', 'sick', 'injured', 'critical', 'quarantined') NOT NULL DEFAULT 'healthy',
     status ENUM('active', 'transferred', 'maintenance') NOT NULL DEFAULT 'active',
     entry_date DATE,
@@ -104,9 +103,9 @@ CREATE TABLE pokemon_keepers (
 -- 9. foods
 CREATE TABLE foods (
     food_id INT AUTO_INCREMENT PRIMARY KEY,
-    food_name VARCHAR(100) NOT NULL,
+    food_name VARCHAR(100) NOT NULL UNIQUE,
     nutrition VARCHAR(255),
-    stock INT NOT NULL DEFAULT 0
+    stock INT NOT NULL DEFAULT 0 CHECK (stock >= 0)
 );
 
 -- 10. feeding_schedules
@@ -145,7 +144,7 @@ CREATE TABLE tickets (
     ticket_type VARCHAR(50),
     payment_method VARCHAR(50),
     purchase_date DATETIME NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
+    price DECIMAL(10,2) NOT NULL CHECK (price >= 0),
     status ENUM('active', 'used', 'cancelled') NOT NULL DEFAULT 'active',
     FOREIGN KEY (visitor_id) REFERENCES visitors(visitor_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -172,6 +171,19 @@ CREATE INDEX idx_interaction_ticket ON pokemon_interactions(ticket_id);
 CREATE INDEX idx_interaction_pokemon ON pokemon_interactions(pokemon_id);
 
 DELIMITER //
+
+CREATE TRIGGER before_feeding_completed
+BEFORE UPDATE ON feeding_schedules
+FOR EACH ROW
+BEGIN
+    IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
+        IF (SELECT stock FROM foods WHERE food_id = NEW.food_id) <= 0 THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Food stock is not enough';
+        END IF;
+    END IF;
+END; //
+
 CREATE TRIGGER after_feeding_completed
 AFTER UPDATE ON feeding_schedules
 FOR EACH ROW
@@ -182,19 +194,39 @@ BEGIN
         WHERE food_id = NEW.food_id;
     END IF;
 END; //
-DELIMITER ;
 
+CREATE TRIGGER before_keeper_insert
+BEFORE INSERT ON keepers
+FOR EACH ROW
+BEGIN
+    IF (SELECT role FROM users WHERE user_id = NEW.user_id) != 'keeper' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'User role must be keeper';
+    END IF;
+END; //
+
+CREATE TRIGGER before_visitor_insert
+BEFORE INSERT ON visitors
+FOR EACH ROW
+BEGIN
+    IF (SELECT role FROM users WHERE user_id = NEW.user_id) != 'visitor' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'User role must be visitor';
+    END IF;
+END; //
+
+DELIMITER ;
 
 INSERT INTO users (username, password, role) VALUES 
 ('admin_oak', 'password123', 'admin'),
 ('keeper_brock', 'password123', 'keeper'),
 ('visitor_ash', 'password123', 'visitor');
 
-SET @keeper_id = (SELECT user_id FROM users WHERE username = 'keeper_brock');
-SET @visitor_id = (SELECT user_id FROM users WHERE username = 'visitor_ash');
+SET @keeper_user_id = (SELECT user_id FROM users WHERE username = 'keeper_brock');
+SET @visitor_user_id = (SELECT user_id FROM users WHERE username = 'visitor_ash');
 
 INSERT INTO keepers (user_id, name, shift, phone_number) VALUES 
-(@keeper_id, 'Brock', 'Morning', '555-0102');
+(@keeper_user_id, 'Brock', 'Morning', '555-0102');
 
 INSERT INTO visitors (user_id, name, email, phone_number) VALUES 
-(@visitor_id, 'Ash Ketchum', 'ash@pallettown.com', '555-0103');
+(@visitor_user_id, 'Ash Ketchum', 'ash@pallettown.com', '555-0103');

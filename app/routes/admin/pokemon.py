@@ -12,26 +12,32 @@ templates = Jinja2Templates(directory="app/templates")
 @router.get("/", response_class=HTMLResponse)
 async def list_pokemon(request: Request):
     query = """
-        SELECT 
-            p.pokemon_id, 
-            p.nickname, 
-            s.species_name, 
-            s.rarity,
-            h.habitat_name, 
-            p.level, 
-            p.health_status, 
-            p.status,
-            GROUP_CONCAT(DISTINCT pt.type_name ORDER BY pt.type_name SEPARATOR ', ') AS types_str,
-            GROUP_CONCAT(DISTINCT k.name ORDER BY k.name SEPARATOR ', ') AS keepers_str
-        FROM pokemon p
-        JOIN pokemon_species s ON p.species_id = s.species_id
-        LEFT JOIN habitats h ON p.habitat_id = h.habitat_id
-        LEFT JOIN species_type st ON s.species_id = st.species_id
-        LEFT JOIN pokemon_types pt ON st.type_id = pt.type_id
-        LEFT JOIN pokemon_keepers pk ON p.pokemon_id = pk.pokemon_id
-        LEFT JOIN keepers k ON pk.keeper_id = k.keeper_id
-        GROUP BY p.pokemon_id, p.nickname, s.species_name, s.rarity, h.habitat_name, p.level, p.health_status, p.status
-        ORDER BY p.pokemon_id DESC
+    SELECT 
+        p.pokemon_id,
+        p.nickname,
+        s.species_name,
+        s.rarity,
+        h.habitat_name,
+        p.health_status,
+        p.status,
+        GROUP_CONCAT(DISTINCT pt.type_name ORDER BY pt.type_name SEPARATOR ', ') AS types_str,
+        GROUP_CONCAT(DISTINCT k.name ORDER BY k.name SEPARATOR ', ') AS keepers_str
+    FROM pokemon p
+    JOIN pokemon_species s ON p.species_id = s.species_id
+    LEFT JOIN habitats h ON p.habitat_id = h.habitat_id
+    LEFT JOIN species_type st ON s.species_id = st.species_id
+    LEFT JOIN pokemon_types pt ON st.type_id = pt.type_id
+    LEFT JOIN pokemon_keepers pk ON p.pokemon_id = pk.pokemon_id
+    LEFT JOIN keepers k ON pk.keeper_id = k.keeper_id
+    GROUP BY 
+        p.pokemon_id,
+        p.nickname,
+        s.species_name,
+        s.rarity,
+        h.habitat_name,
+        p.health_status,
+        p.status
+    ORDER BY p.pokemon_id DESC
     """
     pokemon_list = execute_query(query)
     
