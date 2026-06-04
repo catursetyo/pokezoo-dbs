@@ -60,8 +60,8 @@ async def add_species(
         return RedirectResponse(url="/admin/species?msg=csrf_error", status_code=303)
         
     existing = execute_query(
-        "SELECT species_id FROM pokemon_species WHERE LOWER(species_name) = LOWER(%s) AND rarity = %s",
-        (species_name, rarity)
+        "SELECT species_id FROM pokemon_species WHERE LOWER(species_name) = LOWER(%s)",
+        (species_name,)
     )
     if existing:
         return RedirectResponse(url="/admin/species?msg=duplicate_error", status_code=303)
@@ -73,7 +73,10 @@ async def add_species(
         )
         
         if type_ids:
-            rows = execute_query("SELECT species_id FROM pokemon_species WHERE species_name = %s AND rarity = %s", (species_name, rarity))
+            rows = execute_query(
+                "SELECT species_id FROM pokemon_species WHERE LOWER(species_name) = LOWER(%s)",
+                (species_name,)
+            )
             if rows:
                 new_species_id = rows[0]['species_id']
                 for tid in type_ids:
@@ -110,8 +113,8 @@ async def edit_species(
         return RedirectResponse(url="/admin/species?msg=csrf_error", status_code=303)
 
     existing = execute_query(
-        "SELECT species_id FROM pokemon_species WHERE LOWER(species_name) = LOWER(%s) AND LOWER(rarity) = LOWER(%s) AND species_id != %s",
-        (species_name, rarity, species_id)
+        "SELECT species_id FROM pokemon_species WHERE LOWER(species_name) = LOWER(%s) AND species_id != %s",
+        (species_name, species_id)
     )
     if existing:
         return RedirectResponse(url="/admin/species?msg=duplicate_error", status_code=303)

@@ -33,9 +33,8 @@ CREATE TABLE users (
 -- 2. pokemon_species
 CREATE TABLE pokemon_species (
     species_id INT AUTO_INCREMENT PRIMARY KEY,
-    species_name VARCHAR(100) NOT NULL,
-    rarity VARCHAR(50),
-    UNIQUE(species_name, rarity)
+    species_name VARCHAR(100) NOT NULL UNIQUE,
+    rarity ENUM('Common', 'Uncommon', 'Rare', 'Legendary', 'Mythical') NOT NULL
 );
 
 -- 3. pokemon_types
