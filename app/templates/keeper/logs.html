@@ -1,8 +1,6 @@
 {% extends "keeper/layout.html" %}
-
 {% block title %}Behavior Logs - PokeZOO Keeper{% endblock %}
 {% block header_title %}Log Pokémon Behavior{% endblock %}
-
 {% block keeper_content %}
 <div class="bg-white rounded-lg shadow overflow-hidden max-w-2xl mx-auto">
     <div class="px-6 py-4 border-b border-gray-200">
@@ -12,7 +10,6 @@
     <div class="p-6">
         <form action="/keeper/logs" method="POST" class="space-y-4">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700">Select Pokémon</label>
                 <select name="pokemon_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white">
@@ -21,12 +18,10 @@
                     {% endfor %}
                 </select>
             </div>
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700">Observed Behavior</label>
                 <input type="text" name="behavior" placeholder="e.g. Sleeping peacefully" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
             </div>
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700">Mood</label>
                 <select name="mood" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white">
@@ -36,12 +31,10 @@
                     <option value="lethargic">Lethargic</option>
                 </select>
             </div>
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700">Trigger (Optional)</label>
                 <input type="text" name="trigger_reason" placeholder="e.g. Loud noises, Feeding time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
             </div>
-
             <div class="pt-4">
                 <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 font-bold">Submit Log</button>
             </div>

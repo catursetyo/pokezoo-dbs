@@ -42,7 +42,6 @@ async def add_food(
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/foods?msg=csrf_error", status_code=303)
 
-    # Check for duplicate
     existing = execute_query("SELECT food_id FROM foods WHERE LOWER(food_name) = LOWER(%s)", (food_name,))
     if existing:
         return RedirectResponse(url="/admin/foods?msg=duplicate_error", status_code=303)
@@ -85,7 +84,6 @@ async def edit_food(
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/foods?msg=csrf_error", status_code=303)
 
-    # Check for duplicate
     existing = execute_query(
         "SELECT food_id FROM foods WHERE LOWER(food_name) = LOWER(%s) AND food_id != %s", 
         (food_name, food_id)

@@ -50,7 +50,6 @@ async def add_keeper(
     shift: str = Form(...),
     phone_number: str = Form(...)
 ):
-    # Check CSRF
     session_csrf = request.session.get("csrf_token")
     form_data = await request.form()
     request_csrf = form_data.get("csrf_token")
@@ -58,14 +57,11 @@ async def add_keeper(
         return RedirectResponse(url="/admin/keepers?msg=csrf_error", status_code=303)
         
     try:
-        # Create User first
         execute_query("INSERT INTO users (username, password, role) VALUES (%s, %s, 'keeper')", (username, password))
         
-        # Get the new user_id
         user_row = execute_query("SELECT user_id FROM users WHERE username = %s", (username,))
         new_user_id = user_row[0]['user_id']
         
-        # Create Keeper profile
         execute_query(
             "INSERT INTO keepers (user_id, name, shift, phone_number) VALUES (%s, %s, %s, %s)",
             (new_user_id, name, shift, phone_number)
@@ -77,7 +73,6 @@ async def add_keeper(
 
 @router.post("/delete/{keeper_id}")
 async def delete_keeper(request: Request, keeper_id: int):
-    # Get user_id first so we can delete the login account too
     rows = execute_query("SELECT user_id FROM keepers WHERE keeper_id = %s", (keeper_id,))
     if rows:
         user_id = rows[0]['user_id']
@@ -101,17 +96,13 @@ async def edit_keeper(
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/keepers?msg=csrf_error", status_code=303)
 
-    # Note: Password edit is intentionally omitted for simplicity. 
-    # If a password needs changing, they should recreate the account or build a separate "Change Password" endpoint.
     
     try:
-        # Update Keeper info
         execute_query(
             "UPDATE keepers SET name = %s, shift = %s, phone_number = %s WHERE keeper_id = %s",
             (name, shift, phone_number, keeper_id)
         )
         
-        # Update corresponding User username
         k_rows = execute_query("SELECT user_id FROM keepers WHERE keeper_id = %s", (keeper_id,))
         if k_rows:
             execute_query(

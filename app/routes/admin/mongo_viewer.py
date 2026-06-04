@@ -12,7 +12,6 @@ async def mongo_viewer(request: Request, collection: str = "behavior_logs"):
     db = await get_mongo_db()
     documents = []
     
-    # Simple explicit allowlist for collections to prevent NoSQL injection via arbitrary collection access
     allowed_collections = {
         "behavior_logs": "pokemon_behavior_logs",
         "incident_reports": "incident_reports",
@@ -23,7 +22,6 @@ async def mongo_viewer(request: Request, collection: str = "behavior_logs"):
         coll = db[allowed_collections[collection]]
         cursor = coll.find().limit(50) # Limit for demo
         async for document in cursor:
-            # Convert ObjectId to string for easy rendering in JSON format
             document["_id"] = str(document["_id"])
             documents.append(document)
             

@@ -1,17 +1,12 @@
 {% extends "admin/layout.html" %}
-
 {% block title %}Manage Feeding Schedules - PokeZOO Admin{% endblock %}
 {% block header_title %}Feeding Schedules{% endblock %}
-
 {% block admin_content %}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    
-    <!-- Schedules List -->
     <div class="lg:col-span-2 bg-white shadow rounded-lg overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-bold">Feeding Schedule Log</h3>
         </div>
-        
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -57,8 +52,6 @@
             </table>
         </div>
     </div>
-
-    <!-- Create Schedule Form -->
     <div class="bg-white shadow rounded-lg overflow-hidden h-fit">
         <div class="px-6 py-4 border-b border-gray-200 bg-yellow-50">
         <h3 class="text-lg font-bold text-yellow-800">{% if edit_item %}Edit Schedule{% else %}Assign Feeding{% endif %}</h3>
@@ -66,7 +59,6 @@
     <div class="p-6">
         <form action="{% if edit_item %}/admin/schedules/edit/{{ edit_item.feeding_id }}{% else %}/admin/schedules/add{% endif %}" method="POST" class="space-y-4">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700">Target Pokémon</label>
                 <select name="pokemon_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 border p-2 bg-white">
@@ -76,7 +68,6 @@
                     {% endfor %}
                 </select>
             </div>
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700">Assign to Keeper</label>
                 <select name="keeper_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 border p-2 bg-white">
@@ -86,7 +77,6 @@
                     {% endfor %}
                 </select>
             </div>
-
             <div>
                 <label class="block text-sm font-medium text-gray-700">Food to Give</label>
                 <select name="food_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 border p-2 bg-white">
@@ -96,12 +86,10 @@
                     {% endfor %}
                 </select>
             </div>
-
             <div>
                 <label class="block text-sm font-medium text-gray-700">Scheduled Time</label>
                 <input type="datetime-local" name="feeding_time" value="{{ edit_item.html_time if edit_item else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring-yellow-500 border p-2">
             </div>
-            
             {% if edit_item %}
             <div>
                 <label class="block text-sm font-medium text-gray-700">Status</label>
@@ -112,7 +100,6 @@
                 </select>
             </div>
             {% endif %}
-            
             <div class="pt-4 flex space-x-2">
                 <button type="submit" class="flex-1 bg-yellow-600 text-white px-4 py-2 rounded shadow hover:bg-yellow-700">{% if edit_item %}Update Schedule{% else %}Create Schedule{% endif %}</button>
                 {% if edit_item %}

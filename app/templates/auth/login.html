@@ -1,22 +1,16 @@
 {% extends "base.html" %}
-
 {% block title %}Login - PokeZOO{% endblock %}
-
 {% block content %}
 <div class="flex items-center justify-center min-h-screen bg-gray-100">
     <div class="px-8 py-6 mt-4 text-left bg-white shadow-lg rounded-xl w-full max-w-md">
         <h3 class="text-2xl font-bold text-center">Login to PokeZOO</h3>
-        
         {% if error %}
         <div class="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span class="block sm:inline">{{ error }}</span>
         </div>
         {% endif %}
-
         <form action="/auth/login" method="post" class="mt-4">
-            <!-- CSRF Token for security -->
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            
             <div class="mt-4">
                 <label class="block" for="username">Username</label>
                 <input type="text" placeholder="Username" id="username" name="username" required

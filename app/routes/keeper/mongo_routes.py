@@ -12,7 +12,6 @@ templates = Jinja2Templates(directory="app/templates")
 @router.get("/logs", response_class=HTMLResponse)
 async def get_logs_page(request: Request):
     user_id = request.session.get("user_id")
-    # Get assigned pokemon for dropdown
     keeper_row = execute_query("SELECT keeper_id FROM keepers WHERE user_id = %s", (user_id,))
     assigned_pokemon = []
     if keeper_row:
@@ -39,11 +38,9 @@ async def create_log(
     mood: str = Form(...),
     trigger_reason: str = Form(None)
 ):
-    # MongoDB insertion
     db = await get_mongo_db()
     logs_collection = db["pokemon_behavior_logs"]
     
-    # We create a new document for this log entry
     log_document = {
         "pokemon_id": pokemon_id,
         "keeper_user_id": request.session.get("user_id"),
@@ -56,7 +53,6 @@ async def create_log(
     
     await logs_collection.insert_one(log_document)
     
-    # Use a flash message or simple redirect
     return RedirectResponse(url="/keeper/dashboard?msg=log_added", status_code=303)
 
 

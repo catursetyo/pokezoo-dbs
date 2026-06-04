@@ -37,14 +37,12 @@ async def add_habitat(
     habitat_type: str = Form(...),
     capacity: int = Form(...)
 ):
-    # Check CSRF
     session_csrf = request.session.get("csrf_token")
     form_data = await request.form()
     request_csrf = form_data.get("csrf_token")
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/habitats?msg=csrf_error", status_code=303)
 
-    # Check for duplicate habitat name
     existing = execute_query(
         "SELECT habitat_id FROM habitats WHERE LOWER(habitat_name) = LOWER(%s)",
         (habitat_name,)
@@ -85,7 +83,6 @@ async def edit_habitat(
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/habitats?msg=csrf_error", status_code=303)
 
-    # Check for duplicate habitat name (excluding self)
     existing = execute_query(
         "SELECT habitat_id FROM habitats WHERE LOWER(habitat_name) = LOWER(%s) AND habitat_id != %s",
         (habitat_name, habitat_id)

@@ -53,14 +53,12 @@ async def add_species(
     rarity: str = Form(...),
     type_ids: List[int] = Form(default=[])
 ):
-    # Check CSRF
     session_csrf = request.session.get("csrf_token")
     form_data = await request.form()
     request_csrf = form_data.get("csrf_token")
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/species?msg=csrf_error", status_code=303)
         
-    # Application-level check for duplicate (in case the schema constraint was not applied)
     existing = execute_query(
         "SELECT species_id FROM pokemon_species WHERE LOWER(species_name) = LOWER(%s) AND rarity = %s",
         (species_name, rarity)
@@ -75,7 +73,6 @@ async def add_species(
         )
         
         if type_ids:
-            # Get the newly inserted species_id
             rows = execute_query("SELECT species_id FROM pokemon_species WHERE species_name = %s AND rarity = %s", (species_name, rarity))
             if rows:
                 new_species_id = rows[0]['species_id']
@@ -83,7 +80,6 @@ async def add_species(
                     execute_query("INSERT INTO species_type (species_id, type_id) VALUES (%s, %s)", (new_species_id, tid))
                     
     except Exception as e:
-        # Specifically check for duplicate entry error string in the exception
         if "Duplicate entry" in str(e):
             return RedirectResponse(url="/admin/species?msg=duplicate_error", status_code=303)
         return RedirectResponse(url="/admin/species?msg=error", status_code=303)
@@ -92,8 +88,6 @@ async def add_species(
 
 @router.post("/delete/{species_id}")
 async def delete_species(request: Request, species_id: int):
-    # Note: If a species is referenced by pokemon, DELETE RESTRICT is active in schema.sql.
-    # To prevent 500 error on frontend, we should catch the restriction.
     try:
         execute_query("DELETE FROM pokemon_species WHERE species_id = %s", (species_id,))
     except Exception as e:
@@ -115,7 +109,6 @@ async def edit_species(
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/species?msg=csrf_error", status_code=303)
 
-    # Check duplicate
     existing = execute_query(
         "SELECT species_id FROM pokemon_species WHERE LOWER(species_name) = LOWER(%s) AND LOWER(rarity) = LOWER(%s) AND species_id != %s",
         (species_name, rarity, species_id)
@@ -129,7 +122,6 @@ async def edit_species(
             (species_name, rarity, species_id)
         )
         
-        # Update types mapping
         execute_query("DELETE FROM species_type WHERE species_id = %s", (species_id,))
         for tid in type_ids:
             execute_query("INSERT INTO species_type (species_id, type_id) VALUES (%s, %s)", (species_id, tid))

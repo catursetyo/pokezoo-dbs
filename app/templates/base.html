@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}PokeZOO{% endblock %}</title>
-    <!-- TODO(security): SRI hashes should be used for CDN assets. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="/static/css/styles.css" rel="stylesheet">
     {% block extra_head %}{% endblock %}
@@ -12,7 +11,6 @@
 <body class="bg-gray-100 min-h-screen text-gray-800">
     {% block content %}
     {% endblock %}
-    
     <script src="/static/js/main.js"></script>
     {% block extra_scripts %}{% endblock %}
 </body>

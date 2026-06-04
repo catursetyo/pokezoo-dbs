@@ -18,7 +18,6 @@ async def dashboard(request: Request):
         
     visitor = visitor_row[0]
     
-    # Get user's active tickets
     tickets = execute_query("""
         SELECT ticket_id, visit_date, ticket_type, price, status
         FROM tickets

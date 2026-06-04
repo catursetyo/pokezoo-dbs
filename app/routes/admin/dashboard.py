@@ -9,7 +9,6 @@ templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
-    # Fetch some basic stats
     stats = {
         "pokemon_count": execute_query("SELECT COUNT(*) as count FROM pokemon")[0]['count'],
         "habitats_count": execute_query("SELECT COUNT(*) as count FROM habitats")[0]['count'],

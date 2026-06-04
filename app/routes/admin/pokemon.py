@@ -10,7 +10,6 @@ templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/", response_class=HTMLResponse)
 async def list_pokemon(request: Request):
-    # Retrieve all pokemon with their species and habitat names
     query = """
         SELECT 
             p.pokemon_id, 
@@ -32,7 +31,6 @@ async def list_pokemon(request: Request):
     """
     pokemon_list = execute_query(query)
     
-    # Need species and habitats for the "Add new" form
     species = execute_query("""
         SELECT 
             ps.species_id, 
@@ -51,7 +49,6 @@ async def list_pokemon(request: Request):
     edit_id = request.query_params.get("edit_id")
     edit_item = None
     if edit_id:
-        # For Pokémon, we need to know the current assigned keeper as well
         item_query = """
             SELECT p.*, pk.keeper_id 
             FROM pokemon p 
@@ -83,14 +80,12 @@ async def add_pokemon(
     habitat_id: int = Form(...),
     keeper_id: int = Form(...)
 ):
-    # Check CSRF
     session_csrf = request.session.get("csrf_token")
     form_data = await request.form()
     request_csrf = form_data.get("csrf_token")
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/pokemon?msg=csrf_error", status_code=303)
 
-    # Check for duplicate nickname
     existing = execute_query(
         "SELECT pokemon_id FROM pokemon WHERE LOWER(nickname) = LOWER(%s)",
         (nickname,)
@@ -110,7 +105,6 @@ async def add_pokemon(
         return RedirectResponse(url="/admin/pokemon?msg=error", status_code=303)
     
     if keeper_id:
-        # Get the pokemon we just inserted
         poke_row = execute_query("SELECT pokemon_id FROM pokemon WHERE nickname = %s ORDER BY pokemon_id DESC LIMIT 1", (nickname,))
         if poke_row:
             new_poke_id = poke_row[0]['pokemon_id']
@@ -143,7 +137,6 @@ async def edit_pokemon(
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(request_csrf)):
         return RedirectResponse(url="/admin/pokemon?msg=csrf_error", status_code=303)
 
-    # Check for duplicate nickname (excluding the current pokemon itself)
     existing = execute_query(
         "SELECT pokemon_id FROM pokemon WHERE LOWER(nickname) = LOWER(%s) AND pokemon_id != %s",
         (nickname, pokemon_id)
@@ -163,7 +156,6 @@ async def edit_pokemon(
             return RedirectResponse(url="/admin/pokemon?msg=duplicate_error", status_code=303)
         return RedirectResponse(url="/admin/pokemon?msg=error", status_code=303)
     
-    # Update keeper assignment
     execute_query("DELETE FROM pokemon_keepers WHERE pokemon_id = %s", (pokemon_id,))
     if keeper_id:
         execute_query(

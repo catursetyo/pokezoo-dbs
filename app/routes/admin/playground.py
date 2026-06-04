@@ -21,9 +21,6 @@ async def playground_page(request: Request):
 
 @router.post("/playground", response_class=HTMLResponse)
 async def execute_playground(request: Request, query: str = Form(...)):
-    # Basic validation: block DROP statements
-    # TODO(security): This is a very naive block for a demo. Real protection requires strict DB user permissions!
-    # The prompt explicitly requires "Do NOT allow: DROP DATABASE, DROP TABLE"
     forbidden_pattern = re.compile(r'\b(DROP\s+DATABASE|DROP\s+TABLE)\b', re.IGNORECASE)
     if forbidden_pattern.search(query):
         return templates.TemplateResponse("admin/playground.html", {
@@ -36,10 +33,7 @@ async def execute_playground(request: Request, query: str = Form(...)):
     connection = get_mysql_connection()
     try:
         with connection.cursor() as cursor:
-            # We are explicitly allowing arbitrary SQL here as requested for the "SQL Playground" demo feature.
-            # IN A REAL WORLD APP, THIS IS EXTREMELY DANGEROUS!
             cursor.execute(query)
-            # If it's a select or call returning rows, fetch them
             results = cursor.fetchall()
             
             columns = []

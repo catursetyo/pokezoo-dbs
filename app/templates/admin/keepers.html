@@ -1,12 +1,8 @@
 {% extends "admin/layout.html" %}
-
 {% block title %}Manage Keepers - PokeZOO Admin{% endblock %}
 {% block header_title %}Manage Keepers{% endblock %}
-
 {% block admin_content %}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    
-    <!-- Keeper List -->
     <div class="lg:col-span-2 bg-white shadow rounded-lg overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-bold">All Keepers</h3>
@@ -46,8 +42,6 @@
             </table>
         </div>
     </div>
-
-    <!-- Add/Edit Keeper Form -->
     <div class="bg-white shadow rounded-lg overflow-hidden h-fit">
         <div class="px-6 py-4 border-b border-gray-200 bg-blue-50">
             <h3 class="text-lg font-bold text-blue-800">{% if edit_item %}Edit Keeper{% else %}Add New Keeper{% endif %}</h3>
@@ -55,7 +49,6 @@
         <div class="p-6">
             <form action="{% if edit_item %}/admin/keepers/edit/{{ edit_item.keeper_id }}{% else %}/admin/keepers/add{% endif %}" method="POST" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                
                 <h4 class="font-bold text-sm text-gray-700 border-b pb-1">Login Credentials</h4>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Username</label>
@@ -65,7 +58,6 @@
                     <label class="block text-sm font-medium text-gray-700">Password {% if edit_item %}<span class="text-gray-400 text-xs font-normal">(Leave blank to keep current)</span>{% endif %}</label>
                     <input type="password" name="password" {% if not edit_item %}required{% endif %} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
                 </div>
-                
                 <h4 class="font-bold text-sm text-gray-700 border-b pb-1 mt-6">Keeper Details</h4>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Full Name</label>
@@ -83,7 +75,6 @@
                     <label class="block text-sm font-medium text-gray-700">Phone Number</label>
                     <input type="text" name="phone_number" value="{{ edit_item.phone_number if edit_item else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
                 </div>
-                
                 <div class="pt-4 flex space-x-2">
                     <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">{% if edit_item %}Update Keeper{% else %}Add Keeper{% endif %}</button>
                     {% if edit_item %}

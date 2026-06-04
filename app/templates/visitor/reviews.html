@@ -1,8 +1,6 @@
 {% extends "visitor/layout.html" %}
-
 {% block title %}Leave a Review - PokeZOO{% endblock %}
 {% block header_title %}Visitor Reviews{% endblock %}
-
 {% block visitor_content %}
 <div class="bg-white rounded-lg shadow overflow-hidden max-w-2xl mx-auto border-t-4 border-yellow-500">
     <div class="px-6 py-4 border-b border-gray-200">
@@ -12,7 +10,6 @@
     <div class="p-6">
         <form action="/visitor/reviews" method="POST" class="space-y-4">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700">Rating (1-5)</label>
                 <select name="rating" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white">
@@ -23,17 +20,14 @@
                     <option value="1">⭐ - Terrible</option>
                 </select>
             </div>
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700">Favorite Habitat</label>
                 <input type="text" name="favorite_habitat" placeholder="e.g. Volcano Dome" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
             </div>
-
             <div>
                 <label class="block text-sm font-medium text-gray-700">Comments</label>
                 <textarea name="comment" rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" placeholder="Tell us about your visit..."></textarea>
             </div>
-
             <div class="pt-4">
                 <button type="submit" class="w-full bg-yellow-500 text-white px-4 py-2 rounded shadow hover:bg-yellow-600 font-bold">Submit Review</button>
             </div>

@@ -1,32 +1,24 @@
 {% extends "admin/layout.html" %}
-
 {% block title %}Manage Pokémon - PokeZOO Admin{% endblock %}
 {% block header_title %}Manage Pokémon{% endblock %}
-
 {% block admin_content %}
 <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
     <div class="px-6 py-4 border-b border-gray-200">
         <h3 class="text-lg font-bold">{% if edit_item %}Edit Pokémon{% else %}Add New Pokémon{% endif %}</h3>
     </div>
-    
     {% if request.query_params.get('msg') == 'duplicate_error' %}
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4" role="alert">
         <p class="font-bold">Error</p>
         <p>A Pokémon with that nickname already exists! Nicknames must be unique.</p>
     </div>
     {% endif %}
-
     <div class="p-6">
         <form action="{% if edit_item %}/admin/pokemon/edit/{{ edit_item.pokemon_id }}{% else %}/admin/pokemon/add{% endif %}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700">Nickname</label>
                 <input type="text" name="nickname" value="{{ edit_item.nickname if edit_item else '' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">
             </div>
-            
-
-
             <div>
                 <label class="block text-sm font-medium text-gray-700">Species</label>
                 <select name="species_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 bg-white">
@@ -35,7 +27,6 @@
                     {% endfor %}
                 </select>
             </div>
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700">Habitat</label>
                 <select name="habitat_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 bg-white">
@@ -44,7 +35,6 @@
                     {% endfor %}
                 </select>
             </div>
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700">Assign Keeper</label>
                 <select name="keeper_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 bg-white">
@@ -53,7 +43,6 @@
                     {% endfor %}
                 </select>
             </div>
-            
             {% if edit_item %}
             <div>
                 <label class="block text-sm font-medium text-gray-700">Health Status</label>
@@ -74,7 +63,6 @@
                 </select>
             </div>
             {% endif %}
-            
             <div class="md:col-span-2 pt-4 flex space-x-2">
                 <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">{% if edit_item %}Update Pokémon{% else %}Add Pokémon{% endif %}</button>
                 {% if edit_item %}
@@ -84,7 +72,6 @@
         </form>
     </div>
 </div>
-
 <div class="bg-white rounded-lg shadow overflow-hidden">
     <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">

@@ -19,7 +19,6 @@ async def list_schedules(request: Request):
         ORDER BY fs.feeding_time DESC
     """)
     
-    # Get options for the dropdowns
     pokemon_list = execute_query("SELECT pokemon_id, nickname FROM pokemon ORDER BY nickname")
     keepers_list = execute_query("SELECT keeper_id, name FROM keepers ORDER BY name")
     foods_list = execute_query("SELECT food_id, food_name, stock FROM foods ORDER BY food_name")
@@ -30,7 +29,6 @@ async def list_schedules(request: Request):
         rows = execute_query("SELECT * FROM feeding_schedules WHERE feeding_id = %s", (edit_id,))
         if rows:
             edit_item = rows[0]
-            # Convert datetime to HTML datetime-local format (YYYY-MM-DDThh:mm)
             if edit_item['feeding_time']:
                 edit_item['html_time'] = edit_item['feeding_time'].strftime('%Y-%m-%dT%H:%M')
 
@@ -62,7 +60,6 @@ async def add_schedule(
         return RedirectResponse(url="/admin/schedules?msg=csrf_error", status_code=303)
 
     try:
-        # Convert HTML datetime-local (YYYY-MM-DDThh:mm) to MySQL datetime (YYYY-MM-DD hh:mm:ss)
         mysql_time = feeding_time.replace("T", " ") + ":00"
         
         execute_query(
