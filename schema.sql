@@ -82,11 +82,13 @@ CREATE INDEX idx_pokemon_habitat ON pokemon(habitat_id);
 -- 7. keepers
 CREATE TABLE keepers (
     keeper_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
-    shift VARCHAR(50),
+    shift ENUM('Morning', 'Afternoon', 'Night') NOT NULL,
     phone_number VARCHAR(20),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 -- 8. pokemon_keepers (Many-to-Many Assignment)
@@ -127,13 +129,14 @@ CREATE INDEX idx_feeding_food ON feeding_schedules(food_id);
 -- 11. visitors
 CREATE TABLE visitors (
     visitor_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id INT NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100),
     phone_number VARCHAR(20),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
-
 -- 12. tickets
 CREATE TABLE tickets (
     ticket_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -153,17 +156,19 @@ CREATE INDEX idx_ticket_visitor ON tickets(visitor_id);
 CREATE TABLE pokemon_interactions (
     interaction_id INT AUTO_INCREMENT PRIMARY KEY,
     ticket_id INT NOT NULL,
-    visitor_id INT NOT NULL,
     pokemon_id INT NOT NULL,
     interaction_type ENUM('photo', 'feeding', 'show', 'battle_event') NOT NULL,
     interaction_time DATETIME NOT NULL,
     notes TEXT,
-    FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (visitor_id) REFERENCES visitors(visitor_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (pokemon_id) REFERENCES pokemon(pokemon_id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (pokemon_id) REFERENCES pokemon(pokemon_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
-CREATE INDEX idx_interaction_visitor ON pokemon_interactions(visitor_id);
+CREATE INDEX idx_interaction_ticket ON pokemon_interactions(ticket_id);
 CREATE INDEX idx_interaction_pokemon ON pokemon_interactions(pokemon_id);
 
 DELIMITER //
