@@ -43,6 +43,26 @@ CREATE TABLE pokemon_types (
     type_name VARCHAR(50) NOT NULL UNIQUE
 );
 
+INSERT INTO pokemon_types (type_name) VALUES
+('Normal'),
+('Fire'),
+('Water'),
+('Electric'),
+('Grass'),
+('Ice'),
+('Fighting'),
+('Poison'),
+('Ground'),
+('Flying'),
+('Psychic'),
+('Bug'),
+('Rock'),
+('Ghost'),
+('Dragon'),
+('Dark'),
+('Steel'),
+('Fairy');
+
 -- 4. species_type (Many-to-Many)
 CREATE TABLE species_type (
     species_id INT,
