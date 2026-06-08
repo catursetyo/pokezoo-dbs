@@ -1,9 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Login - PokeZOO{% endblock %}
 {% block content %}
+{% if request.query_params.get('msg') == 'registered' %}
+<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+    <p class="font-bold">Registration successful</p>
+    <p>Your visitor account has been created. Please login.</p>
+</div>
+{% endif %}
 <div class="flex items-center justify-center min-h-screen bg-gray-100">
     <div class="px-8 py-6 mt-4 text-left bg-white shadow-lg rounded-xl w-full max-w-md">
         <h3 class="text-2xl font-bold text-center">Login to PokeZOO</h3>
+        <div class="mt-6 text-center text-sm">
+            <span class="text-gray-500">Don't have a visitor account?</span>
+            <a href="/auth/register" class="text-blue-600 hover:underline font-medium">
+                Register as Visitor
+            </a>
+        </div>
         {% if error %}
         <div class="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span class="block sm:inline">{{ error }}</span>

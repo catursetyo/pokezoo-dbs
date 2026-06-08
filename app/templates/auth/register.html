@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Register Visitor - PokeZOO{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div class="bg-white shadow-lg rounded-lg w-full max-w-md p-8">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-900">Register as Visitor</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                Create your PokeZOO visitor account.
+            </p>
+        </div>
+
+        {% if error %}
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+            <p class="font-bold">Error</p>
+            <p>{{ error }}</p>
+        </div>
+        {% endif %}
+
+        <form action="/auth/register" method="POST" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Username</label>
+                <input
+                    type="text"
+                    name="username"
+                    value="{{ form.username if form else '' }}"
+                    required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="visitor_misty"
+                >
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                <input
+                    type="text"
+                    name="name"
+                    value="{{ form.name if form else '' }}"
+                    required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="Misty Waterflower"
+                >
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                    type="email"
+                    name="email"
+                    value="{{ form.email if form else '' }}"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="misty@example.com"
+                >
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+                <input
+                    type="text"
+                    name="phone_number"
+                    value="{{ form.phone_number if form else '' }}"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="555-0104"
+                >
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="Create a password"
+                >
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                <input
+                    type="password"
+                    name="confirm_password"
+                    required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="Repeat your password"
+                >
+            </div>
+
+            <button
+                type="submit"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md shadow hover:bg-blue-700"
+            >
+                Register
+            </button>
+        </form>
+
+        <div class="mt-6 text-center text-sm">
+            <span class="text-gray-500">Already have an account?</span>
+            <a href="/auth/login" class="text-blue-600 hover:underline font-medium">
+                Login here
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
