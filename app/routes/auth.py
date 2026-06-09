@@ -28,9 +28,16 @@ async def login(
     csrf_token: str = Form(...)
 ):
     session_csrf = request.session.get("csrf_token")
-    if not session_csrf or not secrets.compare_digest(str(session_csrf), str(csrf_token)):
-        return templates.TemplateResponse("auth/login.html", {"request": request, "error": "Invalid CSRF token. Please refresh and try again.", "csrf_token": session_csrf})
     
+    if not session_csrf or not secrets.compare_digest(str(session_csrf), str(csrf_token)):
+        request.session["csrf_token"] = secrets.token_urlsafe(32)
+
+        return templates.TemplateResponse("auth/login.html", {
+            "request": request,
+            "error": "Invalid CSRF token. Please refresh and try again.",
+            "csrf_token": request.session["csrf_token"]
+        })
+        
     users = execute_query("SELECT user_id, password, role FROM users WHERE username = %s", (username,))
     
     if not users:
@@ -78,11 +85,13 @@ async def register(
     session_csrf = request.session.get("csrf_token")
 
     if not session_csrf or not secrets.compare_digest(str(session_csrf), str(csrf_token)):
-        return templates.TemplateResponse("auth/register.html", {
-            "request": request,
-            "error": "Invalid CSRF token. Please refresh and try again.",
-            "csrf_token": session_csrf
-        })
+            request.session["csrf_token"] = secrets.token_urlsafe(32)
+        
+            return templates.TemplateResponse("auth/register.html", {
+                "request": request,
+                "error": "Invalid CSRF token. Please refresh and try again.",
+                "csrf_token": request.session["csrf_token"]
+            })
 
     username = username.strip()
     name = name.strip()
