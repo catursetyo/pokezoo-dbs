@@ -160,7 +160,7 @@ async def explore(request: Request):
             h.habitat_type,
             h.capacity,
             h.status,
-            COUNT(p.pokemon_id) AS pop
+            COUNT(p.pokemon_id) AS population_count
         FROM habitats h
         LEFT JOIN pokemon p
             ON h.habitat_id = p.habitat_id
