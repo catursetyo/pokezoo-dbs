@@ -405,9 +405,17 @@ async def get_reviews_page(request: Request):
     if "csrf_token" not in request.session:
         request.session["csrf_token"] = secrets.token_urlsafe(32)
 
+    habitats = execute_query("""
+        SELECT habitat_id, habitat_name, habitat_type
+        FROM habitats
+        WHERE status = 'active'
+        ORDER BY habitat_name
+    """)
+
     return templates.TemplateResponse("visitor/reviews.html", {
         "request": request,
-        "csrf_token": request.session["csrf_token"]
+        "csrf_token": request.session["csrf_token"],
+        "habitats": habitats
     })
 
 
