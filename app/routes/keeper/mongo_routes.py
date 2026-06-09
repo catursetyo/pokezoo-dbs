@@ -5,6 +5,7 @@ from ...database import get_mongo_db, execute_query
 from ...main import require_role
 from datetime import datetime
 import secrets
+from typing import List
 
 router = APIRouter(dependencies=[Depends(require_role(["keeper"]))])
 templates = Jinja2Templates(directory="app/templates")
@@ -36,7 +37,9 @@ async def create_log(
     pokemon_id: int = Form(...),
     behavior: str = Form(...),
     mood: str = Form(...),
-    trigger_reason: str = Form(None)
+    trigger_reason: str = Form(None),
+    custom_keys: List[str] = Form(default=[]),
+    custom_values: List[str] = Form(default=[])
 ):
     db = await get_mongo_db()
     logs_collection = db["pokemon_behavior_logs"]
@@ -50,6 +53,13 @@ async def create_log(
         "mood": mood,
         "trigger": trigger_reason
     }
+    
+    for k, v in zip(custom_keys, custom_values):
+        k = k.strip()
+        v = v.strip()
+        if k and k not in log_document:
+            log_document[k] = v
+            
     
     await logs_collection.insert_one(log_document)
     
@@ -104,7 +114,9 @@ async def create_incident(
     severity: str = Form(...),
     description: str = Form(...),
     actions_taken: str = Form(...),
-    csrf_token: str = Form(...)
+    csrf_token: str = Form(...),
+    custom_keys: List[str] = Form(default=[]),
+    custom_values: List[str] = Form(default=[])
 ):
     session_csrf = request.session.get("csrf_token")
 
@@ -177,6 +189,12 @@ async def create_incident(
         "description": description.strip(),
         "actions_taken": actions_list
     }
+
+    for k, v in zip(custom_keys, custom_values):
+        k = k.strip()
+        v = v.strip()
+        if k and k not in incident_document:
+            incident_document[k] = v
 
     await incidents_collection.insert_one(incident_document)
 
