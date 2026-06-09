@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from . import dashboard, pokemon, habitats, playground, mongo_viewer, keepers, species, foods, schedules
+from . import dashboard, pokemon, habitats, playground, mongo_viewer, keepers, species, foods, schedules, reports
 
 router = APIRouter()
 
@@ -12,3 +12,4 @@ router.include_router(habitats.router, prefix="/habitats", tags=["admin-habitats
 router.include_router(keepers.router, prefix="/keepers", tags=["admin-keepers"])
 router.include_router(playground.router, tags=["admin-playground"])
 router.include_router(mongo_viewer.router, tags=["admin-mongo-viewer"])
+router.include_router(reports.router, tags=["admin-reports"])

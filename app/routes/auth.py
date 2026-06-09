@@ -14,8 +14,12 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 async def login_page(request: Request):
     if "csrf_token" not in request.session:
         request.session["csrf_token"] = secrets.token_urlsafe(32)
-    return templates.TemplateResponse("auth/login.html", {"request": request, "csrf_token": request.session["csrf_token"]})
 
+    return templates.TemplateResponse("auth/login.html", {
+        "request": request,
+        "csrf_token": request.session["csrf_token"]
+    })
+    
 @router.post("/login")
 async def login(
     request: Request, 
