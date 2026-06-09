@@ -130,11 +130,22 @@ async def dashboard(request: Request):
         LIMIT 20
     """, (visitor["visitor_id"],))
 
+    db = await get_mongo_db()
+
+    review_history = await db["visitor_reviews"].find({
+        "visitor_id": visitor["visitor_id"]
+    }).sort("date_submitted", -1).to_list(length=10)
+
+    for review in review_history:
+        review["_id"] = str(review["_id"])
+        review["comment_text"] = review.get("comment") or "No comment"
+
     return templates.TemplateResponse("visitor/dashboard.html", {
         "request": request,
         "visitor": visitor,
         "tickets": tickets,
-        "interactions": interactions
+        "interactions": interactions,
+        "review_history": review_history
     })
 
 
