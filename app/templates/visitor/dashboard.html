@@ -6,9 +6,16 @@
 {% block visitor_content %}
 
 {% if request.query_params.get('msg') == 'review_submitted' %}
-<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow" role="alert">
     <p class="font-bold">Success</p>
     <p>Your review has been submitted.</p>
+</div>
+{% endif %}
+
+{% if request.query_params.get('msg') == 'interaction_success' %}
+<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow" role="alert">
+    <p class="font-bold">Success</p>
+    <p>Your interaction has been recorded and your ticket has been marked as used.</p>
 </div>
 {% endif %}
 
@@ -95,6 +102,53 @@
         {% else %}
         <p class="text-gray-500 italic">
             You haven't interacted with any Pokémon yet.
+        </p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow p-6 mt-8">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold">My Review History</h3>
+        <a href="/visitor/reviews"
+           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Write Review
+        </a>
+    </div>
+
+    <div class="space-y-3">
+        {% for review in review_history %}
+        <div class="border border-gray-200 rounded p-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="font-semibold">
+                        Favorite Habitat: {{ review.favorite_habitat }}
+                    </p>
+
+                    <p class="mt-2 text-sm text-gray-700">
+                        {{ review.comment_text }}
+                    </p>
+                </div>
+
+                <span class="px-3 py-1 text-xs rounded-full
+                    {% if review.rating >= 4 %}
+                        bg-green-100 text-green-800
+                    {% elif review.rating == 3 %}
+                        bg-yellow-100 text-yellow-800
+                    {% else %}
+                        bg-red-100 text-red-800
+                    {% endif %}">
+                    Rating: {{ review.rating }}/5
+                </span>
+            </div>
+
+            <p class="mt-2 text-xs text-gray-400">
+                Submitted at: {{ review.date_submitted }}
+            </p>
+        </div>
+        {% else %}
+        <p class="text-gray-500 italic">
+            You haven't submitted any reviews yet.
         </p>
         {% endfor %}
     </div>

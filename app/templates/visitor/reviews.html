@@ -21,8 +21,19 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Favorite Habitat</label>
-                <input type="text" name="favorite_habitat" placeholder="e.g. Volcano Dome" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+            	<label class="block text-sm font-medium text-gray-700">Favorite Habitat</label>
+            	<select
+            	    name="favorite_habitat"
+            	    required
+            	    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white"
+            	>
+            	    <option value="" disabled selected>Select your favorite habitat</option>
+            	    {% for h in habitats %}
+            	    <option value="{{ h.habitat_name }}">
+            	        {{ h.habitat_name }}{% if h.habitat_type %} - {{ h.habitat_type }}{% endif %}
+            	    </option>
+            	    {% endfor %}
+            	</select>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Comments</label>

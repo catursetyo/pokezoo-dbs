@@ -3,11 +3,11 @@
 PokeZOO is a hybrid database management system built for a university final project. It simulates a Pokémon zoo ecosystem using both relational (MySQL) and non-relational (MongoDB) databases.
 
 ## Technology Stack
-- **Backend:** Python FastAPI (using purely standard routing/middleware without complex architectures).
-- **Relational DB:** MySQL/MariaDB (via `PyMySQL` driver using raw SQL queries).
-- **Non-Relational DB:** MongoDB (via `Motor` async driver).
-- **Frontend:** HTML Server-Side Templates (Jinja2), Vanilla JavaScript, and TailwindCSS (via CDN).
-- **Authentication:** Cookie/Session-based authentication (No JWTs).
+- **Backend:** Python FastAPI
+- **Relational DB:** MySQL via `PyMySQL` driver using raw SQL queries
+- **Non-Relational DB:** MongoDB via `Motor` async driver
+- **Frontend:** HTML Server-Side Templates (Jinja2) and TailwindCSS via CDN
+- **Authentication:** Cookie/Session-based authentication (No JWTs)
 
 ## Hybrid Database Architecture
 PokeZOO leverages a hybrid approach to data storage, separating strictly structured data from unstructured documentation.
@@ -114,6 +114,12 @@ pokezoo-be/
    ```bash
    uvicorn app.main:app --reload
    ```
+   or
+   ```bash
+   python -m uvicorn app.main:app --reload
+   ```
+
+   if it doesn't work, start the server inside `python venv`
 
 5. **Access the Application**
    Open your browser and navigate to `http://localhost:8000`
@@ -125,4 +131,3 @@ If you ran the Essential Seeding in `schema.sql`, you can log in using:
 - **Visitor**: Username: `visitor_ash` | Password: `password123`
 
 ---
-*Developed for University Database Final Project*

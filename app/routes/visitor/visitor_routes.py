@@ -11,6 +11,21 @@ templates = Jinja2Templates(directory="app/templates")
 
 ALLOWED_INTERACTIONS = {"photo", "feeding", "show", "battle_event"}
 
+TICKET_PRICES = {
+    "Student": 10.00,
+    "General Admission": 25.00,
+    "VIP Pass": 75.00,
+}
+
+TICKET_MAX_USES_CASE = """
+CASE
+    WHEN t.ticket_type = 'VIP Pass' THEN 5
+    WHEN t.ticket_type = 'General Admission' THEN 2
+    WHEN t.ticket_type = 'Student' THEN 1
+    ELSE 1
+END
+"""
+
 
 def get_visitor_profile(request: Request):
     user_id = request.session.get("user_id")
@@ -21,6 +36,34 @@ def get_visitor_profile(request: Request):
     return rows[0] if rows else None
 
 
+def get_active_tickets(visitor_id: int):
+    return execute_query(f"""
+        SELECT *
+        FROM (
+            SELECT
+                t.ticket_id,
+                t.visit_date,
+                t.ticket_type,
+                t.status,
+                COUNT(pi.interaction_id) AS used_count,
+                {TICKET_MAX_USES_CASE} AS max_uses,
+                GREATEST(({TICKET_MAX_USES_CASE}) - COUNT(pi.interaction_id), 0) AS remaining_uses
+            FROM tickets t
+            LEFT JOIN pokemon_interactions pi
+                ON t.ticket_id = pi.ticket_id
+            WHERE t.visitor_id = %s
+              AND t.status = 'active'
+            GROUP BY
+                t.ticket_id,
+                t.visit_date,
+                t.ticket_type,
+                t.status
+        ) ticket_usage
+        WHERE remaining_uses > 0
+        ORDER BY visit_date DESC, ticket_id DESC
+    """, (visitor_id,))
+
+
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
     visitor = get_visitor_profile(request)
@@ -28,11 +71,27 @@ async def dashboard(request: Request):
     if not visitor:
         return HTMLResponse("Visitor profile not found.", status_code=404)
 
-    tickets = execute_query("""
-        SELECT ticket_id, visit_date, ticket_type, price, status
-        FROM tickets
-        WHERE visitor_id = %s
-        ORDER BY visit_date DESC
+    tickets = execute_query(f"""
+        SELECT
+            t.ticket_id,
+            t.visit_date,
+            t.ticket_type,
+            t.price,
+            t.status,
+            COUNT(pi.interaction_id) AS used_count,
+            {TICKET_MAX_USES_CASE} AS max_uses,
+            GREATEST(({TICKET_MAX_USES_CASE}) - COUNT(pi.interaction_id), 0) AS remaining_uses
+        FROM tickets t
+        LEFT JOIN pokemon_interactions pi
+            ON t.ticket_id = pi.ticket_id
+        WHERE t.visitor_id = %s
+        GROUP BY
+            t.ticket_id,
+            t.visit_date,
+            t.ticket_type,
+            t.price,
+            t.status
+        ORDER BY t.visit_date DESC, t.ticket_id DESC
     """, (visitor["visitor_id"],))
 
     interactions = execute_query("""
@@ -71,16 +130,40 @@ async def dashboard(request: Request):
         LIMIT 20
     """, (visitor["visitor_id"],))
 
+    db = await get_mongo_db()
+
+    review_history = await db["visitor_reviews"].find({
+        "visitor_id": visitor["visitor_id"]
+    }).sort("date_submitted", -1).to_list(length=10)
+
+    for review in review_history:
+        review["_id"] = str(review["_id"])
+        review["comment_text"] = review.get("comment") or "No comment"
+
     return templates.TemplateResponse("visitor/dashboard.html", {
         "request": request,
         "visitor": visitor,
         "tickets": tickets,
-        "interactions": interactions
+        "interactions": interactions,
+        "review_history": review_history
     })
 
 
 @router.get("/explore", response_class=HTMLResponse)
 async def explore(request: Request):
+    visitor = get_visitor_profile(request)
+
+    if not visitor:
+        return HTMLResponse("Visitor profile not found.", status_code=404)
+
+    active_tickets = get_active_tickets(visitor["visitor_id"])
+
+    if not active_tickets:
+        return RedirectResponse(
+            url="/visitor/tickets/buy?msg=no_active_ticket",
+            status_code=303
+        )
+
     habitats = execute_query("""
         SELECT
             h.habitat_id,
@@ -88,7 +171,7 @@ async def explore(request: Request):
             h.habitat_type,
             h.capacity,
             h.status,
-            COUNT(p.pokemon_id) AS pop
+            COUNT(p.pokemon_id) AS population_count
         FROM habitats h
         LEFT JOIN pokemon p
             ON h.habitat_id = p.habitat_id
@@ -105,7 +188,9 @@ async def explore(request: Request):
 
     return templates.TemplateResponse("visitor/explore.html", {
         "request": request,
-        "habitats": habitats
+        "visitor": visitor,
+        "habitats": habitats,
+        "active_tickets": active_tickets
     })
 
 
@@ -115,6 +200,14 @@ async def habitat_detail(request: Request, habitat_id: int):
 
     if not visitor:
         return HTMLResponse("Visitor profile not found.", status_code=404)
+
+    active_tickets = get_active_tickets(visitor["visitor_id"])
+
+    if not active_tickets:
+        return RedirectResponse(
+            url="/visitor/tickets/buy?msg=no_active_ticket",
+            status_code=303
+        )
 
     if "csrf_token" not in request.session:
         request.session["csrf_token"] = secrets.token_urlsafe(32)
@@ -155,14 +248,6 @@ async def habitat_detail(request: Request, habitat_id: int):
         ORDER BY ps.species_name, p.nickname
     """, (habitat_id,))
 
-    active_tickets = execute_query("""
-        SELECT ticket_id, visit_date, ticket_type, status
-        FROM tickets
-        WHERE visitor_id = %s
-          AND status = 'active'
-        ORDER BY visit_date DESC
-    """, (visitor["visitor_id"],))
-
     return templates.TemplateResponse("visitor/habitat_detail.html", {
         "request": request,
         "visitor": visitor,
@@ -195,16 +280,32 @@ async def add_interaction(
     if interaction_type not in ALLOWED_INTERACTIONS:
         return RedirectResponse(url="/visitor/explore?msg=invalid_interaction", status_code=303)
 
-    ticket_rows = execute_query("""
-        SELECT ticket_id
-        FROM tickets
-        WHERE ticket_id = %s
-          AND visitor_id = %s
-          AND status = 'active'
+    ticket_rows = execute_query(f"""
+        SELECT *
+        FROM (
+            SELECT
+                t.ticket_id,
+                t.ticket_type,
+                COUNT(pi.interaction_id) AS used_count,
+                {TICKET_MAX_USES_CASE} AS max_uses
+            FROM tickets t
+            LEFT JOIN pokemon_interactions pi
+                ON t.ticket_id = pi.ticket_id
+            WHERE t.ticket_id = %s
+              AND t.visitor_id = %s
+              AND t.status = 'active'
+            GROUP BY
+                t.ticket_id,
+                t.ticket_type
+        ) ticket_usage
+        WHERE used_count < max_uses
     """, (ticket_id, visitor["visitor_id"]))
 
     if not ticket_rows:
-        return RedirectResponse(url="/visitor/explore?msg=invalid_ticket", status_code=303)
+        return RedirectResponse(
+            url="/visitor/tickets/buy?msg=no_active_ticket",
+            status_code=303
+        )
 
     pokemon_rows = execute_query("""
         SELECT p.pokemon_id, p.habitat_id
@@ -218,8 +319,6 @@ async def add_interaction(
     if not pokemon_rows:
         return RedirectResponse(url="/visitor/explore?msg=invalid_pokemon", status_code=303)
 
-    habitat_id = pokemon_rows[0]["habitat_id"]
-
     execute_query("""
         INSERT INTO pokemon_interactions
             (ticket_id, pokemon_id, interaction_type, interaction_time, notes)
@@ -227,8 +326,35 @@ async def add_interaction(
             (%s, %s, %s, NOW(), %s)
     """, (ticket_id, pokemon_id, interaction_type, notes))
 
+    usage_rows = execute_query(f"""
+        SELECT
+            COUNT(pi.interaction_id) AS used_count,
+            {TICKET_MAX_USES_CASE} AS max_uses
+        FROM tickets t
+        LEFT JOIN pokemon_interactions pi
+            ON t.ticket_id = pi.ticket_id
+        WHERE t.ticket_id = %s
+          AND t.visitor_id = %s
+        GROUP BY
+            t.ticket_id,
+            t.ticket_type
+    """, (ticket_id, visitor["visitor_id"]))
+
+    if usage_rows:
+        used_count = int(usage_rows[0]["used_count"])
+        max_uses = int(usage_rows[0]["max_uses"])
+
+        if used_count >= max_uses:
+            execute_query("""
+                UPDATE tickets
+                SET status = 'used'
+                WHERE ticket_id = %s
+                  AND visitor_id = %s
+                  AND status = 'active'
+            """, (ticket_id, visitor["visitor_id"]))
+
     return RedirectResponse(
-        url=f"/visitor/habitats/{habitat_id}?msg=interaction_success",
+        url="/visitor/dashboard?msg=interaction_success",
         status_code=303
     )
 
@@ -256,7 +382,13 @@ async def buy_tickets(
     if not visitor:
         return HTMLResponse("Visitor profile not found.", status_code=404)
 
-    price = 25.00 if ticket_type == "General Admission" else 75.00
+    if ticket_type not in TICKET_PRICES:
+        return RedirectResponse(
+            url="/visitor/tickets/buy?msg=invalid_ticket_type",
+            status_code=303
+        )
+
+    price = TICKET_PRICES[ticket_type]
 
     execute_query("""
         INSERT INTO tickets
@@ -273,9 +405,17 @@ async def get_reviews_page(request: Request):
     if "csrf_token" not in request.session:
         request.session["csrf_token"] = secrets.token_urlsafe(32)
 
+    habitats = execute_query("""
+        SELECT habitat_id, habitat_name, habitat_type
+        FROM habitats
+        WHERE status = 'active'
+        ORDER BY habitat_name
+    """)
+
     return templates.TemplateResponse("visitor/reviews.html", {
         "request": request,
-        "csrf_token": request.session["csrf_token"]
+        "csrf_token": request.session["csrf_token"],
+        "habitats": habitats
     })
 
 

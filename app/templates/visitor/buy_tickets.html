@@ -1,38 +1,99 @@
 {% extends "visitor/layout.html" %}
+
 {% block title %}Buy Tickets - PokeZOO{% endblock %}
 {% block header_title %}Purchase Tickets{% endblock %}
+
 {% block visitor_content %}
+
+{% if request.query_params.get('msg') == 'no_active_ticket' %}
+<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded shadow" role="alert">
+    <p class="font-bold">No Active Ticket</p>
+    <p>You need to buy an active ticket before exploring the zoo.</p>
+</div>
+{% endif %}
+
+{% if request.query_params.get('msg') == 'invalid_ticket_type' %}
+<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow" role="alert">
+    <p class="font-bold">Invalid Ticket Type</p>
+    <p>Please choose a valid ticket type.</p>
+</div>
+{% endif %}
+
 <div class="bg-white rounded-lg shadow overflow-hidden max-w-2xl mx-auto border-t-4 border-indigo-500">
     <div class="px-6 py-4 border-b border-gray-200">
         <h3 class="text-lg font-bold text-indigo-600">Buy Tickets</h3>
         <p class="text-sm text-gray-500">Select your ticket type and visit date.</p>
     </div>
+
     <div class="p-6">
         <form action="/visitor/tickets/buy" method="POST" class="space-y-4">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
             <div>
-                <label class="block text-sm font-medium text-gray-700">Ticket Type</label>
-                <select name="ticket_type" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white">
-                    <option value="General Admission">General Admission ($25.00)</option>
-                    <option value="VIP Pass">VIP Pass ($75.00)</option>
+                <label class="block text-sm font-medium text-gray-700">
+                    Ticket Type
+                </label>
+
+                <select
+                    name="ticket_type"
+                    required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white"
+                >
+                    <option value="Student">
+                        Student ($10.00) - 1 use
+                    </option>
+                    <option value="General Admission">
+                        General Admission ($25.00) - 2 uses
+                    </option>
+                    <option value="VIP Pass">
+                        VIP Pass ($75.00) - 5 uses
+                    </option>
                 </select>
+
+                <p class="text-xs text-gray-500 mt-1">
+                    Each ticket can be used based on its allowed interaction limit.
+                </p>
             </div>
+
             <div>
-                <label class="block text-sm font-medium text-gray-700">Visit Date</label>
-                <input type="date" name="visit_date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                <label class="block text-sm font-medium text-gray-700">
+                    Visit Date
+                </label>
+
+                <input
+                    type="date"
+                    name="visit_date"
+                    required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
+                >
             </div>
+
             <div>
-                <label class="block text-sm font-medium text-gray-700">Payment Method</label>
-                <select name="payment_method" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white">
+                <label class="block text-sm font-medium text-gray-700">
+                    Payment Method
+                </label>
+
+                <select
+                    name="payment_method"
+                    required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2 bg-white"
+                >
                     <option value="Credit Card">Credit Card</option>
                     <option value="Debit Card">Debit Card</option>
                     <option value="PayPal">PayPal</option>
                 </select>
             </div>
+
             <div class="pt-4">
-                <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 font-bold">Purchase Ticket</button>
+                <button
+                    type="submit"
+                    class="w-full bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 font-bold"
+                >
+                    Purchase Ticket
+                </button>
             </div>
         </form>
     </div>
 </div>
+
 {% endblock %}

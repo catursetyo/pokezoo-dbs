@@ -1,0 +1,270 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Statistical Reports - PokeZOO Admin{% endblock %}
+{% block header_title %}Statistical Reports{% endblock %}
+
+{% block admin_content %}
+
+<!-- Visitor Review Summary -->
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">Visitor Reviews Summary</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-sm text-gray-500">Average Rating</p>
+            <p class="text-3xl font-bold text-yellow-600">{{ review_stats.avg_rating }}/5</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-sm text-gray-500">Total Reviews</p>
+            <p class="text-3xl font-bold text-blue-600">{{ review_stats.total_reviews }}</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-sm text-gray-500">Lowest Rating</p>
+            <p class="text-3xl font-bold text-red-600">{{ review_stats.min_rating }}</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-sm text-gray-500">Highest Rating</p>
+            <p class="text-3xl font-bold text-green-600">{{ review_stats.max_rating }}</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold mb-4">Rating Distribution</h3>
+
+            <div class="space-y-2">
+                {% for item in rating_distribution %}
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-gray-700">Rating {{ item._id }}/5</span>
+                    <span class="font-semibold">{{ item.count }} review(s)</span>
+                </div>
+                {% else %}
+                <p class="text-gray-500 italic">No rating data yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold mb-4">Latest Review History</h3>
+
+            <div class="space-y-3 max-h-96 overflow-y-auto">
+                {% for review in review_history %}
+                <div class="border border-gray-200 rounded p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold">{{ review.visitor_name }}</p>
+                            {% if review.visitor_email %}
+                            <p class="text-xs text-gray-500">{{ review.visitor_email }}</p>
+                            {% endif %}
+                            <p class="text-sm text-gray-500">
+                                Favorite Habitat: {{ review.favorite_habitat }}
+                            </p>
+                        </div>
+
+                        <span class="px-3 py-1 text-xs rounded-full
+                            {% if review.rating >= 4 %}
+                                bg-green-100 text-green-800
+                            {% elif review.rating == 3 %}
+                                bg-yellow-100 text-yellow-800
+                            {% else %}
+                                bg-red-100 text-red-800
+                            {% endif %}">
+                            {{ review.rating }}/5
+                        </span>
+                    </div>
+
+                    <p class="mt-2 text-sm text-gray-700">{{ review.comment_text }}</p>
+                    <p class="mt-2 text-xs text-gray-400">{{ review.date_submitted }}</p>
+                </div>
+                {% else %}
+                <p class="text-gray-500 italic">No review history yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incident Report Summary -->
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">Incident Reports Summary</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-sm text-gray-500">Total Incidents</p>
+            <p class="text-3xl font-bold text-red-600">{{ total_incidents }}</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6 md:col-span-2">
+            <p class="text-sm text-gray-500 mb-2">Severity Distribution</p>
+
+            <div class="space-y-2">
+                {% for item in incident_severity_distribution %}
+                <div class="flex justify-between border-b pb-2">
+                    <span>{{ item._id if item._id else 'Unknown' }}</span>
+                    <span class="font-semibold">{{ item.count }} incident(s)</span>
+                </div>
+                {% else %}
+                <p class="text-gray-500 italic">No incident data yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold mb-4">Incidents per Habitat</h3>
+
+            <div class="space-y-2">
+                {% for item in incident_per_habitat %}
+                <div class="flex justify-between border-b pb-2">
+                    <span>{{ item.habitat_name }}</span>
+                    <span class="font-semibold">{{ item.count }} incident(s)</span>
+                </div>
+                {% else %}
+                <p class="text-gray-500 italic">No incident per habitat data yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold mb-4">Latest Incident History</h3>
+
+            <div class="space-y-3 max-h-96 overflow-y-auto">
+                {% for incident in incident_history %}
+                <div class="border border-gray-200 rounded p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold">{{ incident.incident_id }}</p>
+                            <p class="text-sm text-gray-500">Habitat: {{ incident.habitat_name }}</p>
+                            <p class="text-sm text-gray-500">Pokémon: {{ incident.pokemon_name }}</p>
+                        </div>
+
+                        <span class="px-3 py-1 text-xs rounded-full
+                            {% if incident.severity == 'High' or incident.severity == 'high' %}
+                                bg-red-100 text-red-800
+                            {% elif incident.severity == 'Medium' or incident.severity == 'medium' %}
+                                bg-yellow-100 text-yellow-800
+                            {% else %}
+                                bg-green-100 text-green-800
+                            {% endif %}">
+                            {{ incident.severity }}
+                        </span>
+                    </div>
+
+                    <p class="mt-2 text-sm text-gray-700">{{ incident.description }}</p>
+
+                    {% if incident.actions_taken_text %}
+                    <p class="mt-1 text-sm text-gray-500">
+                        Actions Taken: {{ incident.actions_taken_text }}
+                    </p>
+                    {% endif %}
+
+                    <div class="mt-2 space-y-1">
+                    {% for key, value in incident.items() %}
+                        {% if key not in ['_id', 'incident_id', 'keeper_user_id', 'date_reported', 'pokemon_id', 'habitat_id', 'severity', 'description', 'actions_taken', 'actions_taken_text', 'pokemon_name', 'species_name', 'habitat_name', 'keeper_name'] %}
+                            <p class="text-sm text-gray-600 bg-gray-50 p-1 rounded inline-block mr-2 mb-1 border border-gray-100">
+                                <span class="font-semibold">{{ key }}:</span> {{ value }}
+                            </p>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+
+                    <p class="mt-2 text-xs text-gray-400">{{ incident.date_reported }}</p>
+                </div>
+                {% else %}
+                <p class="text-gray-500 italic">No incident history yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Behavior Report Summary -->
+<div class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-900 mb-4">Pokémon Behavior Reports Summary</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-sm text-gray-500">Total Behavior Reports</p>
+            <p class="text-3xl font-bold text-purple-600">{{ total_behavior_reports }}</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6 md:col-span-2">
+            <p class="text-sm text-gray-500 mb-2">Mood Distribution</p>
+
+            <div class="space-y-2">
+                {% for item in behavior_mood_distribution %}
+                <div class="flex justify-between border-b pb-2">
+                    <span>{{ item._id if item._id else 'Unknown' }}</span>
+                    <span class="font-semibold">{{ item.count }} report(s)</span>
+                </div>
+                {% else %}
+                <p class="text-gray-500 italic">No mood data yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold mb-4">Reports per Pokémon</h3>
+
+            <div class="space-y-2">
+                {% for item in behavior_per_pokemon %}
+                <div class="flex justify-between border-b pb-2">
+                    <span>{{ item.pokemon_name }}</span>
+                    <span class="font-semibold">{{ item.count }} report(s)</span>
+                </div>
+                {% else %}
+                <p class="text-gray-500 italic">No behavior report per Pokémon data yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold mb-4">Latest Behavior Report History</h3>
+
+            <div class="space-y-3 max-h-96 overflow-y-auto">
+                {% for log in behavior_history %}
+                <div class="border border-gray-200 rounded p-4">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold">{{ log.pokemon_name }}</p>
+                            <p class="text-sm text-gray-500">Mood: {{ log.mood }}</p>
+                        </div>
+
+                        <span class="text-xs text-gray-400">
+                            {{ log.date }} {{ log.time }}
+                        </span>
+                    </div>
+
+                    <p class="mt-2 text-sm text-gray-700">{{ log.behavior }}</p>
+
+                    {% if log.trigger %}
+                    <p class="mt-1 text-sm text-gray-500">
+                        Trigger: {{ log.trigger }}
+                    </p>
+                    {% endif %}
+
+                    <div class="mt-2 space-y-1">
+                    {% for key, value in log.items() %}
+                        {% if key not in ['_id', 'pokemon_id', 'keeper_user_id', 'date', 'time', 'behavior', 'mood', 'trigger', 'pokemon_name', 'species_name', 'keeper_name'] %}
+                            <p class="text-sm text-gray-600 bg-gray-50 p-1 rounded inline-block mr-2 mb-1 border border-gray-100">
+                                <span class="font-semibold">{{ key }}:</span> {{ value }}
+                            </p>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-gray-500 italic">No behavior report history yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
