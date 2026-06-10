@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, Form, Depends
 from typing import List
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from ...database import execute_query
+from ...database import execute_query, mysql_transaction
 import secrets
 
 router = APIRouter(dependencies=[Depends(require_role(["admin"]))])
@@ -70,20 +70,17 @@ async def add_species(
         return RedirectResponse(url="/admin/species?msg=duplicate_error", status_code=303)
 
     try:
-        execute_query(
-            "INSERT INTO pokemon_species (species_name, rarity) VALUES (%s, %s)",
-            (species_name, rarity)
-        )
-        
-        if type_ids:
-            rows = execute_query(
-                "SELECT species_id FROM pokemon_species WHERE LOWER(species_name) = LOWER(%s)",
-                (species_name,)
+        with mysql_transaction() as cursor:
+            cursor.execute(
+                "INSERT INTO pokemon_species (species_name, rarity) VALUES (%s, %s)",
+                (species_name, rarity)
             )
-            if rows:
-                new_species_id = rows[0]['species_id']
-                for tid in type_ids:
-                    execute_query("INSERT INTO species_type (species_id, type_id) VALUES (%s, %s)", (new_species_id, tid))
+            new_species_id = cursor.lastrowid
+            for tid in type_ids:
+                cursor.execute(
+                    "INSERT INTO species_type (species_id, type_id) VALUES (%s, %s)",
+                    (new_species_id, tid)
+                )
                     
     except Exception as e:
         if "Duplicate entry" in str(e):
@@ -126,14 +123,17 @@ async def edit_species(
         return RedirectResponse(url="/admin/species?msg=duplicate_error", status_code=303)
 
     try:
-        execute_query(
-            "UPDATE pokemon_species SET species_name = %s, rarity = %s WHERE species_id = %s",
-            (species_name, rarity, species_id)
-        )
-        
-        execute_query("DELETE FROM species_type WHERE species_id = %s", (species_id,))
-        for tid in type_ids:
-            execute_query("INSERT INTO species_type (species_id, type_id) VALUES (%s, %s)", (species_id, tid))
+        with mysql_transaction() as cursor:
+            cursor.execute(
+                "UPDATE pokemon_species SET species_name = %s, rarity = %s WHERE species_id = %s",
+                (species_name, rarity, species_id)
+            )
+            cursor.execute("DELETE FROM species_type WHERE species_id = %s", (species_id,))
+            for tid in type_ids:
+                cursor.execute(
+                    "INSERT INTO species_type (species_id, type_id) VALUES (%s, %s)",
+                    (species_id, tid)
+                )
             
     except Exception as e:
         if "Duplicate entry" in str(e):

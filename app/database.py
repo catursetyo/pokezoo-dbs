@@ -2,6 +2,7 @@ import pymysql
 import motor.motor_asyncio
 import os
 import logging
+from contextlib import contextmanager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -48,6 +49,19 @@ def execute_query(query: str, params: tuple = None):
     except Exception as e:
         logger.error(f"Database query error")
         raise e
+    finally:
+        connection.close()
+
+@contextmanager
+def mysql_transaction():
+    connection = get_mysql_connection()
+    try:
+        with connection.cursor() as cursor:
+            yield cursor
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
     finally:
         connection.close()
 

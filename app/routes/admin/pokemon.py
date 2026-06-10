@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from ...database import execute_query
+from ...database import execute_query, mysql_transaction
 from ...main import require_role
 import secrets
 from typing import List
@@ -117,21 +117,19 @@ async def add_pokemon(
         VALUES (%s, %s, %s, CURDATE())
     """
     try:
-        execute_query(query, (species_id, habitat_id, nickname))
+        with mysql_transaction() as cursor:
+            cursor.execute(query, (species_id, habitat_id, nickname))
+            new_poke_id = cursor.lastrowid
+
+            for kid in keeper_ids:
+                cursor.execute(
+                    "INSERT INTO pokemon_keepers (pokemon_id, keeper_id, assigned_since) VALUES (%s, %s, CURDATE())",
+                    (new_poke_id, kid)
+                )
     except Exception as e:
         if "Duplicate entry" in str(e):
             return RedirectResponse(url="/admin/pokemon?msg=duplicate_error", status_code=303)
         return RedirectResponse(url="/admin/pokemon?msg=error", status_code=303)
-    
-    if keeper_ids:
-        poke_row = execute_query("SELECT pokemon_id FROM pokemon WHERE nickname = %s ORDER BY pokemon_id DESC LIMIT 1", (nickname,))
-        if poke_row:
-            new_poke_id = poke_row[0]['pokemon_id']
-            for kid in keeper_ids:
-                execute_query(
-                    "INSERT INTO pokemon_keepers (pokemon_id, keeper_id, assigned_since) VALUES (%s, %s, CURDATE())", 
-                    (new_poke_id, kid)
-                )
             
     return RedirectResponse(url="/admin/pokemon", status_code=303)
 
@@ -179,17 +177,20 @@ async def edit_pokemon(
         WHERE pokemon_id = %s
     """
     try:
-        execute_query(query, (species_id, habitat_id, nickname, health_status, status, pokemon_id))
+        with mysql_transaction() as cursor:
+            cursor.execute(
+                query,
+                (species_id, habitat_id, nickname, health_status, status, pokemon_id)
+            )
+            cursor.execute("DELETE FROM pokemon_keepers WHERE pokemon_id = %s", (pokemon_id,))
+            for kid in keeper_ids:
+                cursor.execute(
+                    "INSERT INTO pokemon_keepers (pokemon_id, keeper_id, assigned_since) VALUES (%s, %s, CURDATE())",
+                    (pokemon_id, kid)
+                )
     except Exception as e:
         if "Duplicate entry" in str(e):
             return RedirectResponse(url="/admin/pokemon?msg=duplicate_error", status_code=303)
         return RedirectResponse(url="/admin/pokemon?msg=error", status_code=303)
-    
-    execute_query("DELETE FROM pokemon_keepers WHERE pokemon_id = %s", (pokemon_id,))
-    for kid in keeper_ids:
-        execute_query(
-            "INSERT INTO pokemon_keepers (pokemon_id, keeper_id, assigned_since) VALUES (%s, %s, CURDATE())",
-            (pokemon_id, kid)
-        )
         
     return RedirectResponse(url="/admin/pokemon", status_code=303)

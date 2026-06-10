@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from ...main import require_role
-from ...database import execute_query
+from ...database import execute_query, mysql_transaction
 import secrets
 
 router = APIRouter(dependencies=[Depends(require_role(["admin"]))])
@@ -57,16 +57,20 @@ async def add_keeper(
         return RedirectResponse(url="/admin/keepers?msg=csrf_error", status_code=303)
         
     try:
-        execute_query("INSERT INTO users (username, password, role) VALUES (%s, %s, 'keeper')", (username, password))
-        
-        user_row = execute_query("SELECT user_id FROM users WHERE username = %s", (username,))
-        new_user_id = user_row[0]['user_id']
-        
-        execute_query(
-            "INSERT INTO keepers (user_id, name, shift, phone_number) VALUES (%s, %s, %s, %s)",
-            (new_user_id, name, shift, phone_number)
-        )
+        with mysql_transaction() as cursor:
+            cursor.execute(
+                "INSERT INTO users (username, password, role) VALUES (%s, %s, 'keeper')",
+                (username, password)
+            )
+            new_user_id = cursor.lastrowid
+
+            cursor.execute(
+                "INSERT INTO keepers (user_id, name, shift, phone_number) VALUES (%s, %s, %s, %s)",
+                (new_user_id, name, shift, phone_number)
+            )
     except Exception as e:
+        if "Duplicate entry" in str(e):
+            return RedirectResponse(url="/admin/keepers?msg=duplicate_error", status_code=303)
         return RedirectResponse(url=f"/admin/keepers?msg=error", status_code=303)
         
     return RedirectResponse(url="/admin/keepers", status_code=303)
@@ -76,8 +80,9 @@ async def delete_keeper(request: Request, keeper_id: int):
     rows = execute_query("SELECT user_id FROM keepers WHERE keeper_id = %s", (keeper_id,))
     if rows:
         user_id = rows[0]['user_id']
-        execute_query("DELETE FROM keepers WHERE keeper_id = %s", (keeper_id,))
-        execute_query("DELETE FROM users WHERE user_id = %s", (user_id,))
+        with mysql_transaction() as cursor:
+            cursor.execute("DELETE FROM keepers WHERE keeper_id = %s", (keeper_id,))
+            cursor.execute("DELETE FROM users WHERE user_id = %s", (user_id,))
         
     return RedirectResponse(url="/admin/keepers", status_code=303)
 
@@ -98,16 +103,22 @@ async def edit_keeper(
 
     
     try:
-        execute_query(
-            "UPDATE keepers SET name = %s, shift = %s, phone_number = %s WHERE keeper_id = %s",
-            (name, shift, phone_number, keeper_id)
-        )
-        
-        k_rows = execute_query("SELECT user_id FROM keepers WHERE keeper_id = %s", (keeper_id,))
-        if k_rows:
-            execute_query(
+        with mysql_transaction() as cursor:
+            cursor.execute(
+                "SELECT user_id FROM keepers WHERE keeper_id = %s",
+                (keeper_id,)
+            )
+            keeper_row = cursor.fetchone()
+            if not keeper_row:
+                return RedirectResponse(url="/admin/keepers?msg=error", status_code=303)
+
+            cursor.execute(
+                "UPDATE keepers SET name = %s, shift = %s, phone_number = %s WHERE keeper_id = %s",
+                (name, shift, phone_number, keeper_id)
+            )
+            cursor.execute(
                 "UPDATE users SET username = %s WHERE user_id = %s",
-                (username, k_rows[0]['user_id'])
+                (username, keeper_row['user_id'])
             )
             
     except Exception as e:
