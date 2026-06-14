@@ -17,6 +17,8 @@ TICKET_PRICES = {
     "VIP Pass": 75.00,
 }
 
+PAYMENT_METHODS = {"Credit Card", "Debit Card", "PayPal"}
+
 TICKET_MAX_USES_CASE = """
 CASE
     WHEN t.ticket_type = 'VIP Pass' THEN 5
@@ -388,6 +390,12 @@ async def buy_tickets(
             status_code=303
         )
 
+    if payment_method not in PAYMENT_METHODS:
+        return RedirectResponse(
+            url="/visitor/tickets/buy?msg=invalid_payment_method",
+            status_code=303
+        )
+
     price = TICKET_PRICES[ticket_type]
 
     execute_query("""
@@ -398,7 +406,6 @@ async def buy_tickets(
     """, (visitor["visitor_id"], visit_date, ticket_type, payment_method, price))
 
     return RedirectResponse(url="/visitor/dashboard", status_code=303)
-
 
 @router.get("/reviews", response_class=HTMLResponse)
 async def get_reviews_page(request: Request):
