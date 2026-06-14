@@ -67,6 +67,15 @@
                     <option value="critical" {% if edit_item.health_status == 'critical' %}selected{% endif %}>Critical</option>
                     <option value="quarantined" {% if edit_item.health_status == 'quarantined' %}selected{% endif %}>Quarantined</option>
                 </select>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Health Change Reason</label>
+                    <textarea
+                        name="health_note"
+                        rows="2"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2"
+                        placeholder="Optional: explain why this Pokémon health status changed..."
+                    ></textarea>
+                </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Status</label>

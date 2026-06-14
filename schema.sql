@@ -11,6 +11,7 @@ DROP TABLE IF EXISTS feeding_schedules;
 DROP TABLE IF EXISTS foods;
 DROP TABLE IF EXISTS pokemon_keepers;
 DROP TABLE IF EXISTS keepers;
+DROP TABLE IF EXISTS pokemon_health_history;
 DROP TABLE IF EXISTS pokemon;
 DROP TABLE IF EXISTS habitats;
 DROP TABLE IF EXISTS species_type;
@@ -189,6 +190,26 @@ CREATE TABLE pokemon_interactions (
 
 CREATE INDEX idx_interaction_ticket ON pokemon_interactions(ticket_id);
 CREATE INDEX idx_interaction_pokemon ON pokemon_interactions(pokemon_id);
+
+-- 14. pokemon_health_history
+CREATE TABLE pokemon_health_history (
+    history_id INT AUTO_INCREMENT PRIMARY KEY,
+    pokemon_id INT NOT NULL,
+    old_health_status ENUM('healthy', 'sick', 'injured', 'critical', 'quarantined'),
+    new_health_status ENUM('healthy', 'sick', 'injured', 'critical', 'quarantined') NOT NULL,
+    changed_by INT,
+    change_reason TEXT,
+    changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (pokemon_id) REFERENCES pokemon(pokemon_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (changed_by) REFERENCES users(user_id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+CREATE INDEX idx_health_history_pokemon ON pokemon_health_history(pokemon_id);
+CREATE INDEX idx_health_history_changed_by ON pokemon_health_history(changed_by);
 
 DROP TRIGGER IF EXISTS before_feeding_schedule_insert;
 DROP TRIGGER IF EXISTS before_feeding_schedule_update;
