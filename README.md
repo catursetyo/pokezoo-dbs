@@ -107,7 +107,18 @@ pokezoo-be/
 
 3. **Database Seeding**
    - Create a database in your MySQL server named `pokezoo`.
-   - Run the `schema.sql` file against this database to create all the tables.
+   - Import the `schema.sql` file into that database to create all tables, triggers, and seed data.
+   - Example using the MySQL CLI:
+     ```bash
+     mysql -u your_username -p pokezoo < schema.sql
+     ```
+   - Or inside the MySQL prompt:
+     ```sql
+     CREATE DATABASE IF NOT EXISTS pokezoo;
+     USE pokezoo;
+     SOURCE /home/Satyz/study/sbd/fp/pokezoo-dbs/schema.sql;
+     ```
+   - **Important:** `schema.sql` starts with several `DROP TABLE IF EXISTS` statements, so re-importing it will reset the existing schema and data.
    - *Note:* The bottom of `schema.sql` contains **Essential Seeding** which inserts three dummy users required for login.
 
 4. **Start the Server**
