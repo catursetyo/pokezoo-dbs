@@ -105,9 +105,9 @@ pokezoo-be/
    - `MYSQL_PASSWORD`
    - `MYSQL_DB`
 
-3. **Database Seeding**
+3. **Database Setup**
    - Create a database in your MySQL server named `pokezoo`.
-   - Import the `schema.sql` file into that database to create all tables, triggers, and seed data.
+   - Import the `schema.sql` file into that database to create all tables and triggers.
    - Example using the MySQL CLI:
      ```bash
      mysql -u your_username -p pokezoo < schema.sql
@@ -119,9 +119,22 @@ pokezoo-be/
      SOURCE /home/Satyz/study/sbd/fp/pokezoo-dbs/schema.sql;
      ```
    - **Important:** `schema.sql` starts with several `DROP TABLE IF EXISTS` statements, so re-importing it will reset the existing schema and data.
-   - *Note:* The bottom of `schema.sql` contains **Essential Seeding** which inserts three dummy users required for login.
 
-4. **Start the Server**
+4. **Import Dummy Data**
+   - Import `seed.sql` after `schema.sql` if you want sample data for testing and demo purposes.
+   - Example using the MySQL CLI:
+     ```bash
+     mysql -u your_username -p pokezoo < seed.sql
+     ```
+   - Or inside the MySQL prompt:
+     ```sql
+     USE pokezoo;
+     SOURCE /home/Satyz/study/sbd/fp/pokezoo-dbs/seed.sql;
+     ```
+   - **Important:** `seed.sql` uses multiple `TRUNCATE TABLE` statements before inserting dummy data, so re-importing it will clear existing table contents and replace them with sample data.
+   - This file includes sample users, Pokemon, habitats, foods, schedules, and other demo records.
+
+5. **Start the Server**
    ```bash
    uvicorn app.main:app --reload
    ```
@@ -132,11 +145,11 @@ pokezoo-be/
 
    if it doesn't work, start the server inside `python venv`
 
-5. **Access the Application**
+6. **Access the Application**
    Open your browser and navigate to `http://localhost:8000`
 
 ### Dummy Accounts
-If you ran the Essential Seeding in `schema.sql`, you can log in using:
+If you imported `seed.sql`, you can log in using:
 - **Admin**: Username: `admin_oak` | Password: `password123`
 - **Keeper**: Username: `keeper_brock` | Password: `password123`
 - **Visitor**: Username: `visitor_ash` | Password: `password123`
