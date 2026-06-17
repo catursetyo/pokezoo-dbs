@@ -92,96 +92,33 @@ pokezoo-be/
 - Python 3.8+
 - MySQL / MariaDB Server running locally
 - MongoDB Server running locally (`mongodb://127.0.0.1:27017`)
+- `make` (for running Makefile commands)
 
 ### Installation & Setup
 
-### Quick Setup
+1. **Database Configuration**
+   By default, the application connects to a MySQL database named `pokezoo` on localhost.
+   You can override this by editing `app/database.py` or exporting environment variables:
+   - `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DB`
 
-If MySQL/MariaDB and MongoDB are already running locally, you can run the full setup with:
+2. **Create the Database**
+   Ensure MySQL and MongoDB are running, then create the `pokezoo` database in MySQL:
+   ```bash
+   mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS pokezoo;"
+   ```
 
-```bash
-pip install -r requirements.txt && mysql -u your_username -p -e "CREATE DATABASE IF NOT EXISTS pokezoo;" && mysql -u your_username -p pokezoo < database/schema.sql && mysql -u your_username -p pokezoo < database/seed.sql && mongosh pokezoo database/mongo_seed.js && python -m uvicorn app.main:app --reload
-```
-
-Replace `your_username` with your local MySQL/MariaDB username. The command imports the schema, MySQL dummy data, MongoDB dummy data, then starts the FastAPI server.
-
-### Setup Using Makefile (Recommended)
-We provide a `Makefile` to simplify setup and development.
-
-1. Ensure MySQL and MongoDB are running.
-2. Create the database: `mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS pokezoo;"`
-3. Run the full setup:
+3. **Run Full Setup (Install, Migrate, & Seed)**
+   We provide a `Makefile` to automate the entire setup process. This will install Python dependencies, create tables, and insert dummy data for both MySQL and MongoDB:
    ```bash
    make setup
    ```
-4. Start the server:
+
+4. **Start the Development Server**
    ```bash
    make dev
    ```
 
-1. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Database Configuration**
-   By default, the application connects to a MySQL database named `pokezoo` on localhost.
-   You can override this by editing `app/database.py` or exporting environment variables:
-   - `MYSQL_HOST`
-   - `MYSQL_USER`
-   - `MYSQL_PASSWORD`
-   - `MYSQL_DB`
-
-3. **Database Setup**
-   - Create a database in your MySQL server named `pokezoo`.
-   - Import the `schema.sql` file into that database to create all tables and triggers.
-   - Example using the MySQL CLI:
-     ```bash
-     mysql -u your_username -p pokezoo < database/schema.sql
-     ```
-   - Or inside the MySQL prompt:
-     ```sql
-     CREATE DATABASE IF NOT EXISTS pokezoo;
-     USE pokezoo;
-     SOURCE /home/Satyz/study/sbd/fp/pokezoo-dbs/schema.sql;
-     ```
-   - **Important:** `schema.sql` starts with several `DROP TABLE IF EXISTS` statements, so re-importing it will reset the existing schema and data.
-
-4. **Import Dummy Data**
-   - Import `seed.sql` after `schema.sql` if you want sample data for testing and demo purposes.
-   - Example using the MySQL CLI:
-     ```bash
-     mysql -u your_username -p pokezoo < database/seed.sql
-     ```
-   - Or inside the MySQL prompt:
-     ```sql
-     USE pokezoo;
-     SOURCE /home/Satyz/study/sbd/fp/pokezoo-dbs/seed.sql;
-     ```
-   - **Important:** `seed.sql` uses multiple `TRUNCATE TABLE` statements before inserting dummy data, so re-importing it will clear existing table contents and replace them with sample data.
-   - This file includes sample users, Pokemon, habitats, foods, schedules, and other demo records.
-
-5. **Import MongoDB Dummy Data**
-   - Import `mongo_seed.js` after `seed.sql` to add sample MongoDB documents for behavior logs, incident reports, and visitor reviews.
-   - Make sure MongoDB is running locally at `mongodb://127.0.0.1:27017`.
-   - Example using `mongosh`:
-     ```bash
-     mongosh pokezoo database/mongo_seed.js
-     ```
-   - **Important:** `mongo_seed.js` clears the `pokemon_behavior_logs`, `incident_reports`, and `visitor_reviews` collections before inserting demo data.
-
-6. **Start the Server**
-   ```bash
-   uvicorn app.main:app --reload
-   ```
-   or
-   ```bash
-   python -m uvicorn app.main:app --reload
-   ```
-
-   if it doesn't work, start the server inside `python venv`
-
-7. **Access the Application**
+5. **Access the Application**
    Open your browser and navigate to `http://localhost:8000`
 
 ### Dummy Accounts
