@@ -92,6 +92,16 @@ pokezoo-be/
 
 ### Installation & Setup
 
+### Quick Setup
+
+If MySQL/MariaDB and MongoDB are already running locally, you can run the full setup with:
+
+```bash
+pip install -r requirements.txt && mysql -u your_username -p -e "CREATE DATABASE IF NOT EXISTS pokezoo;" && mysql -u your_username -p pokezoo < schema.sql && mysql -u your_username -p pokezoo < seed.sql && mongosh pokezoo mongo_seed.js && python -m uvicorn app.main:app --reload
+```
+
+Replace `your_username` with your local MySQL/MariaDB username. The command imports the schema, MySQL dummy data, MongoDB dummy data, then starts the FastAPI server.
+
 1. **Install Dependencies**
    ```bash
    pip install -r requirements.txt
