@@ -77,7 +77,10 @@ pokezoo-be/
 │   │   ├── auth/         # Login HTML
 │   │   └── base.html     # Main layout wrapper
 │   └── static/           # Static assets (CSS, JS, Images)
-├── schema.sql            # MySQL table schemas, indexes, and triggers
+├── database/             # Database initialization scripts
+│   ├── schema.sql        # MySQL table schemas, indexes, and triggers
+│   ├── seed.sql          # MySQL dummy data
+│   └── mongo_seed.js     # MongoDB dummy data
 └── requirements.txt      # Python dependencies
 ```
 
@@ -97,10 +100,24 @@ pokezoo-be/
 If MySQL/MariaDB and MongoDB are already running locally, you can run the full setup with:
 
 ```bash
-pip install -r requirements.txt && mysql -u your_username -p -e "CREATE DATABASE IF NOT EXISTS pokezoo;" && mysql -u your_username -p pokezoo < schema.sql && mysql -u your_username -p pokezoo < seed.sql && mongosh pokezoo mongo_seed.js && python -m uvicorn app.main:app --reload
+pip install -r requirements.txt && mysql -u your_username -p -e "CREATE DATABASE IF NOT EXISTS pokezoo;" && mysql -u your_username -p pokezoo < database/schema.sql && mysql -u your_username -p pokezoo < database/seed.sql && mongosh pokezoo database/mongo_seed.js && python -m uvicorn app.main:app --reload
 ```
 
 Replace `your_username` with your local MySQL/MariaDB username. The command imports the schema, MySQL dummy data, MongoDB dummy data, then starts the FastAPI server.
+
+### Setup Using Makefile (Recommended)
+We provide a `Makefile` to simplify setup and development.
+
+1. Ensure MySQL and MongoDB are running.
+2. Create the database: `mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS pokezoo;"`
+3. Run the full setup:
+   ```bash
+   make setup
+   ```
+4. Start the server:
+   ```bash
+   make dev
+   ```
 
 1. **Install Dependencies**
    ```bash
@@ -120,7 +137,7 @@ Replace `your_username` with your local MySQL/MariaDB username. The command impo
    - Import the `schema.sql` file into that database to create all tables and triggers.
    - Example using the MySQL CLI:
      ```bash
-     mysql -u your_username -p pokezoo < schema.sql
+     mysql -u your_username -p pokezoo < database/schema.sql
      ```
    - Or inside the MySQL prompt:
      ```sql
@@ -134,7 +151,7 @@ Replace `your_username` with your local MySQL/MariaDB username. The command impo
    - Import `seed.sql` after `schema.sql` if you want sample data for testing and demo purposes.
    - Example using the MySQL CLI:
      ```bash
-     mysql -u your_username -p pokezoo < seed.sql
+     mysql -u your_username -p pokezoo < database/seed.sql
      ```
    - Or inside the MySQL prompt:
      ```sql
@@ -149,7 +166,7 @@ Replace `your_username` with your local MySQL/MariaDB username. The command impo
    - Make sure MongoDB is running locally at `mongodb://127.0.0.1:27017`.
    - Example using `mongosh`:
      ```bash
-     mongosh pokezoo mongo_seed.js
+     mongosh pokezoo database/mongo_seed.js
      ```
    - **Important:** `mongo_seed.js` clears the `pokemon_behavior_logs`, `incident_reports`, and `visitor_reviews` collections before inserting demo data.
 

@@ -8,15 +8,15 @@ dev:
 
 migrate:
 	@echo "Running MySQL schema migration..."
-	mysql -u $(DB_USER) -p $(DB_NAME) < schema.sql
+	mysql -u $(DB_USER) -p $(DB_NAME) < database/schema.sql
 
 seed:
 	@echo "Seeding MySQL data..."
-	mysql -u $(DB_USER) -p $(DB_NAME) < seed.sql
+	mysql -u $(DB_USER) -p $(DB_NAME) < database/seed.sql
 
 mongoseed:
 	@echo "Seeding MongoDB data..."
-	mongosh $(DB_NAME) mongo_seed.js
+	mongosh $(DB_NAME) database/mongo_seed.js
 
 install:
 	pip install -r requirements.txt
