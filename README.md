@@ -134,7 +134,16 @@ pokezoo-be/
    - **Important:** `seed.sql` uses multiple `TRUNCATE TABLE` statements before inserting dummy data, so re-importing it will clear existing table contents and replace them with sample data.
    - This file includes sample users, Pokemon, habitats, foods, schedules, and other demo records.
 
-5. **Start the Server**
+5. **Import MongoDB Dummy Data**
+   - Import `mongo_seed.js` after `seed.sql` to add sample MongoDB documents for behavior logs, incident reports, and visitor reviews.
+   - Make sure MongoDB is running locally at `mongodb://127.0.0.1:27017`.
+   - Example using `mongosh`:
+     ```bash
+     mongosh pokezoo mongo_seed.js
+     ```
+   - **Important:** `mongo_seed.js` clears the `pokemon_behavior_logs`, `incident_reports`, and `visitor_reviews` collections before inserting demo data.
+
+6. **Start the Server**
    ```bash
    uvicorn app.main:app --reload
    ```
@@ -145,7 +154,7 @@ pokezoo-be/
 
    if it doesn't work, start the server inside `python venv`
 
-6. **Access the Application**
+7. **Access the Application**
    Open your browser and navigate to `http://localhost:8000`
 
 ### Dummy Accounts
