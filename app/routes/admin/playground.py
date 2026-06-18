@@ -10,13 +10,29 @@ import re
 router = APIRouter(dependencies=[Depends(require_role(["admin"]))])
 templates = Jinja2Templates(directory="app/templates")
 
-def get_table_names():
+def get_table_schemas():
     connection = get_mysql_connection()
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SHOW TABLES")
+            cursor.execute("""
+                SELECT
+                    TABLE_NAME AS table_name,
+                    COLUMN_NAME AS column_name
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                ORDER BY TABLE_NAME, ORDINAL_POSITION
+            """)
             rows = cursor.fetchall()
-            return [list(row.values())[0] for row in rows]
+
+            tables = {}
+            for row in rows:
+                table_name = row["table_name"]
+                tables.setdefault(table_name, []).append(row["column_name"])
+
+            return [
+                {"name": table_name, "columns": columns}
+                for table_name, columns in tables.items()
+            ]
     finally:
         connection.close()
 
@@ -27,12 +43,12 @@ async def playground_page(request: Request):
     return templates.TemplateResponse("admin/playground.html", {
         "request": request, 
         "csrf_token": request.session["csrf_token"],
-        "tables": get_table_names()
+        "table_schemas": get_table_schemas()
     })
 
 @router.post("/playground", response_class=HTMLResponse)
 async def execute_playground(request: Request, query: str = Form(...)):
-    tables = get_table_names()
+    table_schemas = get_table_schemas()
     forbidden_pattern = re.compile(r'\b(DROP\s+DATABASE|DROP\s+TABLE)\b', re.IGNORECASE)
     if forbidden_pattern.search(query):
         return templates.TemplateResponse("admin/playground.html", {
@@ -40,7 +56,7 @@ async def execute_playground(request: Request, query: str = Form(...)):
             "error": "Execution forbidden: DROP statements are not allowed.",
             "query": query,
             "csrf_token": request.session.get("csrf_token"),
-            "tables": tables
+            "table_schemas": table_schemas
         })
 
     connection = get_mysql_connection()
@@ -59,7 +75,7 @@ async def execute_playground(request: Request, query: str = Form(...)):
                 "columns": columns,
                 "query": query,
                 "csrf_token": request.session.get("csrf_token"),
-                "tables": tables
+                "table_schemas": table_schemas
             })
     except Exception as e:
         return templates.TemplateResponse("admin/playground.html", {
@@ -67,7 +83,7 @@ async def execute_playground(request: Request, query: str = Form(...)):
             "error": f"SQL Error: {str(e)}",
             "query": query,
             "csrf_token": request.session.get("csrf_token"),
-            "tables": tables
+            "table_schemas": table_schemas
         })
     finally:
         connection.close()
