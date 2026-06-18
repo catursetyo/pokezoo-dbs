@@ -107,7 +107,7 @@ pokezoo-be/
    mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS pokezoo;"
    ```
 
-3. **Run Full Setup (Install, Migrate, & Seed)**
+3. **Run Full Setup (Install, Migrate, Seed, MongoSeed)**
    We provide a `Makefile` to automate the entire setup process. This will install Python dependencies, create tables, dan insert dummy data for both MySQL and MongoDB:
    - **For Linux/Mac (or Windows with WSL/Git Bash):**
      ```bash
@@ -129,14 +129,23 @@ pokezoo-be/
      ```cmd
      dev.bat
      ```
+	 if `dev.bat` doesn't works, use `pdev.bat` instead:
+	 ```cmd
+	 pdev.bat
+	 ```
 
 5. **Access the Application**
    Open your browser and navigate to `http://localhost:8000`
 
 ### Dummy Accounts
-If you imported `seed.sql`, you can log in using:
+If you imported `schema.sql`, you can log in using:
 - **Admin**: Username: `admin_oak` | Password: `password123`
 - **Keeper**: Username: `keeper_brock` | Password: `password123`
 - **Visitor**: Username: `visitor_ash` | Password: `password123`
+
+### Dummy Data
+And if you import `seed.sql`, you can get dozens of data like `pokemons`, `pokemon_types`, `habitats`, `foods`, etc.
+
+In addition, you can import `mongo_seed.js` to get `visitor_reviews`, `pokemon_behavior_logs`, and `incident_reports` data.
 
 ---
