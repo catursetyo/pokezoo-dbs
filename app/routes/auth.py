@@ -1,14 +1,11 @@
-from fastapi import APIRouter, Request, Form, Depends, HTTPException, status
+from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from passlib.context import CryptContext
 from ..database import execute_query, get_mysql_connection
 import secrets
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
@@ -45,12 +42,7 @@ async def login(
         
     user = users[0]
     
-    try:
-        valid_password = pwd_context.verify(password, user['password'])
-    except ValueError:
-        valid_password = (password == user['password'])
-
-    if not valid_password:
+    if password != user['password']:
         return templates.TemplateResponse("auth/login.html", {"request": request, "error": "Invalid username or password", "csrf_token": request.session.get("csrf_token")})
     
     request.session.clear()
@@ -142,8 +134,6 @@ async def register(
             }
         })
 
-    hashed_password = pwd_context.hash(password)
-
     connection = get_mysql_connection()
 
     try:
@@ -153,7 +143,7 @@ async def register(
                 INSERT INTO users (username, password, role)
                 VALUES (%s, %s, 'visitor')
                 """,
-                (username, hashed_password)
+                (username, password)
             )
 
             new_user_id = cursor.lastrowid

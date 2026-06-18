@@ -3,7 +3,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from ...database import get_mysql_connection
 from ...main import require_role
-import pymysql
 import secrets
 import re
 

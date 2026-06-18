@@ -1,12 +1,10 @@
-from fastapi import FastAPI, Request, Form, Depends, HTTPException, status
-from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
+from fastapi import FastAPI, Request, Depends, HTTPException, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
 import os
 import secrets
-from .database import execute_query
 
 app = FastAPI(title="PokeZOO API")
 
@@ -52,10 +50,6 @@ def require_role(allowed_roles: list):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
         return user
     return role_checker
-
-@app.get("/pokemon.png", include_in_schema=False)
-async def pokemon_png():
-    return FileResponse("app/static/pokemon.png")
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):

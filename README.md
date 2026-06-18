@@ -112,6 +112,7 @@ pokezoo-be/
 │   ├── schema.sql        # MySQL table schemas, indexes, and triggers
 │   ├── seed.sql          # MySQL dummy data
 │   └── mongo_seed.js     # MongoDB dummy data
+├── docs/                 # Project report documents
 └── requirements.txt      # Python dependencies
 ```
 
