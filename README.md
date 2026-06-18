@@ -27,13 +27,15 @@ PokeZOO leverages a hybrid approach to data storage, separating strictly structu
    - **Incident Reports:** Keepers submit potentially complex arrays of actions and severities for emergencies.
    - **Visitor Reviews:** Visitors submit text feedback and ratings.
 
-## Entity Relationship Diagram (ERD)
+---
+
+## ERD Design
 
 ![ERD](/assets/ERD.png)
 
 The PokeZOO database is designed to manage the main operations of a Pokémon zoo, including Pokémon data, habitats, keepers, visitors, tickets, feeding schedules, health records, and visitor interactions.
 
-### Main Entities
+### Entities
 
 - `users` stores login accounts and roles such as admin, keeper, and visitor.
 - `visitors` stores visitor profile information and is linked to `users`.
@@ -56,7 +58,7 @@ The ERD shows that each Pokémon belongs to one species and one habitat. A speci
 
 Visitors can buy multiple tickets, and each ticket can be used to record interactions with Pokémon. Feeding schedules connect Pokémon, keepers, and food, while health history records all health status changes made by users.
 
-This database structure keeps the PokeZOO system organized and consistent by separating data into related tables. It supports key features such as Pokémon management, habitat management, keeper assignment, feeding schedules, ticket purchases, health tracking, and visitor interactions.
+---
 
 ## User Roles & Capabilities
 
