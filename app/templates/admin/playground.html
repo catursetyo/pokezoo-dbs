@@ -18,7 +18,7 @@
             </div>
         </div>
         {% endif %}
-        <form action="/admin/playground" method="POST">
+        <form id="sql-playground-form" action="/admin/playground" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <div class="mb-4">
                 <label for="query" class="block text-sm font-medium text-gray-700 mb-2">SQL Query</label>
@@ -69,4 +69,165 @@ JOIN habitats h ON p.habitat_id = h.habitat_id;" required>{{ query if query else
     <p>Query executed successfully. 0 rows returned.</p>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const editor = document.getElementById("query");
+    const form = document.getElementById("sql-playground-form");
+    const indent = "    ";
+
+    if (!editor || !form) {
+        return;
+    }
+
+    function getLineStart(value, position) {
+        return value.lastIndexOf("\n", position - 1) + 1;
+    }
+
+    function getLineIndent(value, position) {
+        const lineStart = getLineStart(value, position);
+        const line = value.slice(lineStart, position);
+        const match = line.match(/^[ \t]*/);
+        return match ? match[0].replace(/\t/g, indent) : "";
+    }
+
+    function replaceSelection(text, selectionStart, selectionEnd) {
+        const before = editor.value.slice(0, selectionStart);
+        const after = editor.value.slice(selectionEnd);
+        editor.value = before + text + after;
+        editor.selectionStart = selectionStart + text.length;
+        editor.selectionEnd = selectionStart + text.length;
+    }
+
+    function indentSelectedLines(selectionStart, selectionEnd) {
+        const value = editor.value;
+        const start = getLineStart(value, selectionStart);
+        let end = selectionEnd;
+
+        if (selectionEnd > selectionStart && value[selectionEnd - 1] === "\n") {
+            end -= 1;
+        }
+
+        const selectedText = value.slice(start, end);
+        const indentedText = selectedText
+            .split("\n")
+            .map(function (line) {
+                return indent + line;
+            })
+            .join("\n");
+
+        editor.value = value.slice(0, start) + indentedText + value.slice(end);
+        editor.selectionStart = selectionStart + indent.length;
+        editor.selectionEnd = selectionEnd + (indentedText.length - selectedText.length);
+    }
+
+    function unindentSelectedLines(selectionStart, selectionEnd) {
+        const value = editor.value;
+        const start = getLineStart(value, selectionStart);
+        let end = selectionEnd;
+
+        if (selectionEnd > selectionStart && value[selectionEnd - 1] === "\n") {
+            end -= 1;
+        }
+
+        const selectedText = value.slice(start, end);
+        let removedBeforeSelection = 0;
+        let totalRemoved = 0;
+
+        const unindentedText = selectedText
+            .split("\n")
+            .map(function (line, index) {
+                let removed = 0;
+
+                if (line.startsWith(indent)) {
+                    removed = indent.length;
+                    line = line.slice(indent.length);
+                } else if (line.startsWith("\t")) {
+                    removed = 1;
+                    line = line.slice(1);
+                } else {
+                    const spaces = line.match(/^ {1,3}/);
+                    if (spaces) {
+                        removed = spaces[0].length;
+                        line = line.slice(removed);
+                    }
+                }
+
+                if (index === 0) {
+                    removedBeforeSelection = removed;
+                }
+
+                totalRemoved += removed;
+                return line;
+            })
+            .join("\n");
+
+        editor.value = value.slice(0, start) + unindentedText + value.slice(end);
+        editor.selectionStart = Math.max(start, selectionStart - removedBeforeSelection);
+        editor.selectionEnd = Math.max(editor.selectionStart, selectionEnd - totalRemoved);
+    }
+
+    editor.addEventListener("keydown", function (event) {
+        const selectionStart = editor.selectionStart;
+        const selectionEnd = editor.selectionEnd;
+
+        if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+            event.preventDefault();
+            form.requestSubmit();
+            return;
+        }
+
+        if (event.key === "Tab") {
+            event.preventDefault();
+
+            if (selectionStart !== selectionEnd && editor.value.slice(selectionStart, selectionEnd).includes("\n")) {
+                if (event.shiftKey) {
+                    unindentSelectedLines(selectionStart, selectionEnd);
+                } else {
+                    indentSelectedLines(selectionStart, selectionEnd);
+                }
+                return;
+            }
+
+            if (event.shiftKey) {
+                const lineStart = getLineStart(editor.value, selectionStart);
+                const beforeCursor = editor.value.slice(lineStart, selectionStart);
+                const removable = beforeCursor.match(/(?: {1,4}|\t)$/);
+
+                if (removable) {
+                    const removeStart = selectionStart - removable[0].length;
+                    editor.value = editor.value.slice(0, removeStart) + editor.value.slice(selectionStart);
+                    editor.selectionStart = removeStart;
+                    editor.selectionEnd = removeStart;
+                }
+                return;
+            }
+
+            replaceSelection(indent, selectionStart, selectionEnd);
+            return;
+        }
+
+        if (event.key === "Enter") {
+            event.preventDefault();
+            const currentIndent = getLineIndent(editor.value, selectionStart);
+            replaceSelection("\n" + currentIndent, selectionStart, selectionEnd);
+        }
+    });
+
+    editor.addEventListener("paste", function (event) {
+        const pastedText = event.clipboardData.getData("text");
+
+        if (pastedText.includes("\t")) {
+            event.preventDefault();
+            replaceSelection(
+                pastedText.replace(/\t/g, indent),
+                editor.selectionStart,
+                editor.selectionEnd
+            );
+        }
+    });
+});
+</script>
 {% endblock %}
