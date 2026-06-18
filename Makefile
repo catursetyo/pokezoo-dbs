@@ -4,6 +4,9 @@ DB_USER ?= root
 DB_NAME ?= pokezoo
 
 dev:
+	uvicorn app.main:app --reload
+
+pdev:
 	python3 -m uvicorn app.main:app --reload
 
 migrate:
