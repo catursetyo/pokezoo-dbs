@@ -27,7 +27,36 @@ PokeZOO leverages a hybrid approach to data storage, separating strictly structu
    - **Incident Reports:** Keepers submit potentially complex arrays of actions and severities for emergencies.
    - **Visitor Reviews:** Visitors submit text feedback and ratings.
 
----
+## Entity Relationship Diagram (ERD)
+
+![ERD](/assets/ERD.png)
+
+The PokeZOO database is designed to manage the main operations of a Pokémon zoo, including Pokémon data, habitats, keepers, visitors, tickets, feeding schedules, health records, and visitor interactions.
+
+### Main Entities
+
+- `users` stores login accounts and roles such as admin, keeper, and visitor.
+- `visitors` stores visitor profile information and is linked to `users`.
+- `keepers` stores keeper profile information and is also linked to `users`.
+- `pokemon_species` stores Pokémon species data, including rarity.
+- `pokemon_types` stores Pokémon type data.
+- `species_type` connects species and types because one species can have multiple types.
+- `habitats` stores habitat information such as name, type, capacity, and status.
+- `pokemon` stores individual Pokémon data, including species, habitat, nickname, health status, and entry date.
+- `pokemon_keepers` connects Pokémon and keepers because one keeper can handle many Pokémon, and one Pokémon can be handled by many keepers.
+- `foods` stores food data and stock information.
+- `feeding_schedules` stores Pokémon feeding schedules, including the Pokémon, keeper, food, time, and status.
+- `pokemon_health_history` records changes in Pokémon health status.
+- `tickets` stores visitor ticket purchases and ticket status.
+- `pokemon_interactions` records interactions between visitors and Pokémon using valid tickets.
+
+### Relationships
+
+The ERD shows that each Pokémon belongs to one species and one habitat. A species can have multiple types through the `species_type` table. Keepers and Pokémon have a many-to-many relationship through `pokemon_keepers`.
+
+Visitors can buy multiple tickets, and each ticket can be used to record interactions with Pokémon. Feeding schedules connect Pokémon, keepers, and food, while health history records all health status changes made by users.
+
+This database structure keeps the PokeZOO system organized and consistent by separating data into related tables. It supports key features such as Pokémon management, habitat management, keeper assignment, feeding schedules, ticket purchases, health tracking, and visitor interactions.
 
 ## User Roles & Capabilities
 
