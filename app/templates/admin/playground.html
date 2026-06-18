@@ -8,11 +8,25 @@
         <p class="text-sm text-gray-500">Warning: Use carefully. DROP statements are blocked.</p>
     </div>
     <div class="p-6">
+        {% if tables %}
+        <div class="mb-6">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Available Tables</h4>
+            <div class="flex flex-wrap gap-2">
+                {% for table in tables %}
+                <span class="inline-flex items-center rounded bg-gray-100 px-3 py-1 text-sm font-mono text-gray-700 border border-gray-200">{{ table }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
         <form action="/admin/playground" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <div class="mb-4">
                 <label for="query" class="block text-sm font-medium text-gray-700 mb-2">SQL Query</label>
-                <textarea id="query" name="query" rows="5" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-3 font-mono text-sm" placeholder="SELECT * FROM pokemon p JOIN habitats h ON p.habitat_id = h.habitat_id;" required>{{ query if query else '' }}</textarea>
+                <textarea id="query" name="query" rows="8" wrap="off" spellcheck="false" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-3 font-mono text-sm leading-6 overflow-x-auto whitespace-pre" style="tab-size: 4;" placeholder="SELECT
+    p.nickname,
+    h.habitat_name
+FROM pokemon p
+JOIN habitats h ON p.habitat_id = h.habitat_id;" required>{{ query if query else '' }}</textarea>
             </div>
             <button type="submit" class="bg-yellow-500 text-white px-6 py-2 rounded shadow hover:bg-yellow-600 font-bold">Execute</button>
         </form>
