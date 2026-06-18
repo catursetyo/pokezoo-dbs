@@ -355,8 +355,10 @@ async def add_interaction(
                   AND status = 'active'
             """, (ticket_id, visitor["visitor_id"]))
 
+    habitat_id = pokemon_rows[0]["habitat_id"]
+
     return RedirectResponse(
-        url="/visitor/dashboard?msg=interaction_success",
+        url=f"/visitor/habitats/{habitat_id}?msg=interaction_success",
         status_code=303
     )
 
@@ -419,10 +421,27 @@ async def get_reviews_page(request: Request):
         ORDER BY habitat_name
     """)
 
+    db = await get_mongo_db()
+    
+    recent_reviews = await db["visitor_reviews"].find().sort("date_submitted", -1).to_list(length=20)
+    
+    if recent_reviews:
+        visitor_ids = list(set([r["visitor_id"] for r in recent_reviews]))
+        if visitor_ids:
+            placeholders = ', '.join(['%s'] * len(visitor_ids))
+            visitors = execute_query(f"SELECT visitor_id, name FROM visitors WHERE visitor_id IN ({placeholders})", tuple(visitor_ids))
+            visitor_map = {v["visitor_id"]: v["name"] for v in visitors}
+            
+            for review in recent_reviews:
+                review["_id"] = str(review["_id"])
+                review["visitor_name"] = visitor_map.get(review["visitor_id"], "Unknown Visitor")
+                review["comment_text"] = review.get("comment") or "No comment"
+
     return templates.TemplateResponse("visitor/reviews.html", {
         "request": request,
         "csrf_token": request.session["csrf_token"],
-        "habitats": habitats
+        "habitats": habitats,
+        "recent_reviews": recent_reviews
     })
 
 
@@ -452,4 +471,4 @@ async def create_review(
 
     await reviews_col.insert_one(review_doc)
 
-    return RedirectResponse(url="/visitor/dashboard?msg=review_submitted", status_code=303)
+    return RedirectResponse(url="/visitor/reviews?msg=review_submitted", status_code=303)

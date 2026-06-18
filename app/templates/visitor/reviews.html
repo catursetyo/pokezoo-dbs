@@ -2,6 +2,14 @@
 {% block title %}Leave a Review - PokeZOO{% endblock %}
 {% block header_title %}Visitor Reviews{% endblock %}
 {% block visitor_content %}
+
+{% if request.query_params.get('msg') == 'review_submitted' %}
+<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow max-w-2xl mx-auto" role="alert">
+    <p class="font-bold">Success</p>
+    <p>Your review has been submitted successfully. Thank you for your feedback!</p>
+</div>
+{% endif %}
+
 <div class="bg-white rounded-lg shadow overflow-hidden max-w-2xl mx-auto border-t-4 border-yellow-500">
     <div class="px-6 py-4 border-b border-gray-200">
         <h3 class="text-lg font-bold text-yellow-600">Leave a Review</h3>
@@ -49,5 +57,35 @@
             </div>
         </form>
     </div>
+</div>
+
+<div class="max-w-2xl mx-auto mt-10">
+    <h3 class="text-2xl font-bold mb-6 text-gray-800">Recent Visitor Reviews</h3>
+    
+    {% if recent_reviews %}
+        <div class="space-y-6">
+            {% for review in recent_reviews %}
+            <div class="bg-white rounded-lg shadow p-6 border border-gray-100">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="font-bold text-gray-900">{{ review.visitor_name }}</h4>
+                        <p class="text-sm text-gray-500">Favorite Habitat: {{ review.favorite_habitat }}</p>
+                    </div>
+                    <div class="text-yellow-500 text-lg">
+                        {% for i in range(review.rating) %}★{% endfor %}{% for i in range(5 - review.rating) %}☆{% endfor %}
+                    </div>
+                </div>
+                <p class="text-gray-700 italic">"{{ review.comment_text }}"</p>
+                <div class="mt-4 text-xs text-gray-400 text-right">
+                    {{ review.date_submitted[:10] }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+            No reviews yet. Be the first to leave one!
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
