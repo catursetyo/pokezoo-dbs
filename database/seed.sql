@@ -241,37 +241,6 @@ INSERT INTO feeding_schedules (pokemon_id, keeper_id, food_id, feeding_time, sta
 ((SELECT pokemon_id FROM pokemon WHERE nickname = 'Ember'),   (SELECT keeper_id FROM keepers WHERE name = 'Misty'),  (SELECT food_id FROM foods WHERE food_name = 'Charcoal Crunch'),   '2026-06-13 12:00:00', 'missed'),
 ((SELECT pokemon_id FROM pokemon WHERE nickname = 'Shadow'),  (SELECT keeper_id FROM keepers WHERE name = 'Tracey'), (SELECT food_id FROM foods WHERE food_name = 'Mystic Mineral'),    '2026-06-13 22:00:00', 'missed');
 
-INSERT INTO pokemon_interactions (ticket_id, pokemon_id, interaction_type, interaction_time, notes) VALUES
-((SELECT ticket_id FROM tickets t JOIN visitors v ON t.visitor_id = v.visitor_id WHERE v.name = 'Ash Ketchum' AND t.visit_date = '2026-06-15' AND t.ticket_type = 'VIP Pass'),
- (SELECT pokemon_id FROM pokemon WHERE nickname = 'Sparky'), 'photo', '2026-06-15 09:10:00', 'Ash took a photo with Sparky.'),
-
-((SELECT ticket_id FROM tickets t JOIN visitors v ON t.visitor_id = v.visitor_id WHERE v.name = 'Ash Ketchum' AND t.visit_date = '2026-06-15' AND t.ticket_type = 'VIP Pass'),
- (SELECT pokemon_id FROM pokemon WHERE nickname = 'Blaze'), 'show', '2026-06-15 10:25:00', 'Blaze performed a small flame show.'),
-
-((SELECT ticket_id FROM tickets t JOIN visitors v ON t.visitor_id = v.visitor_id WHERE v.name = 'Ash Ketchum' AND t.visit_date = '2026-05-20' AND t.ticket_type = 'General Admission'),
- (SELECT pokemon_id FROM pokemon WHERE nickname = 'Shellby'), 'feeding', '2026-05-20 11:05:00', 'Visitor assisted keeper during feeding session.'),
-
-((SELECT ticket_id FROM tickets t JOIN visitors v ON t.visitor_id = v.visitor_id WHERE v.name = 'Ash Ketchum' AND t.visit_date = '2026-05-20' AND t.ticket_type = 'General Admission'),
- (SELECT pokemon_id FROM pokemon WHERE nickname = 'Sprout'), 'photo', '2026-05-20 12:30:00', 'Ticket usage completed after second interaction.'),
-
-((SELECT ticket_id FROM tickets t JOIN visitors v ON t.visitor_id = v.visitor_id WHERE v.name = 'Serena' AND t.visit_date = '2026-06-15' AND t.ticket_type = 'General Admission'),
- (SELECT pokemon_id FROM pokemon WHERE nickname = 'Melody'), 'show', '2026-06-15 13:00:00', 'Melody sang during the visitor show.'),
-
-((SELECT ticket_id FROM tickets t JOIN visitors v ON t.visitor_id = v.visitor_id WHERE v.name = 'Lillie' AND t.visit_date = '2026-06-15' AND t.ticket_type = 'VIP Pass'),
- (SELECT pokemon_id FROM pokemon WHERE nickname = 'Marina'), 'photo', '2026-06-15 09:30:00', 'Photo session near Aqua Lagoon.'),
-
-((SELECT ticket_id FROM tickets t JOIN visitors v ON t.visitor_id = v.visitor_id WHERE v.name = 'Lillie' AND t.visit_date = '2026-06-15' AND t.ticket_type = 'VIP Pass'),
- (SELECT pokemon_id FROM pokemon WHERE nickname = 'Sparky'), 'photo', '2026-06-15 10:10:00', 'Second VIP interaction.'),
-
-((SELECT ticket_id FROM tickets t JOIN visitors v ON t.visitor_id = v.visitor_id WHERE v.name = 'Lillie' AND t.visit_date = '2026-06-15' AND t.ticket_type = 'VIP Pass'),
- (SELECT pokemon_id FROM pokemon WHERE nickname = 'Blaze'), 'show', '2026-06-15 11:00:00', 'Third VIP interaction.'),
-
-((SELECT ticket_id FROM tickets t JOIN visitors v ON t.visitor_id = v.visitor_id WHERE v.name = 'Lillie' AND t.visit_date = '2026-06-15' AND t.ticket_type = 'VIP Pass'),
- (SELECT pokemon_id FROM pokemon WHERE nickname = 'Rocky'), 'battle_event', '2026-06-15 14:20:00', 'Battle event demonstration.'),
-
-((SELECT ticket_id FROM tickets t JOIN visitors v ON t.visitor_id = v.visitor_id WHERE v.name = 'Lillie' AND t.visit_date = '2026-06-15' AND t.ticket_type = 'VIP Pass'),
- (SELECT pokemon_id FROM pokemon WHERE nickname = 'Nimbus'), 'photo', '2026-06-15 16:45:00', 'Fifth interaction, VIP ticket marked used.' );
-
 INSERT INTO pokemon_health_history (pokemon_id, old_health_status, new_health_status, changed_by, change_reason, changed_at) VALUES
 ((SELECT pokemon_id FROM pokemon WHERE nickname = 'Sparky'), NULL, 'healthy', (SELECT user_id FROM users WHERE username = 'admin_oak'), 'Initial health intake.', '2026-01-10 08:00:00'),
 ((SELECT pokemon_id FROM pokemon WHERE nickname = 'Ember'), 'healthy', 'injured', (SELECT user_id FROM users WHERE username = 'keeper_misty'), 'Minor tail burn during habitat adjustment.', '2026-05-12 14:30:00'),
