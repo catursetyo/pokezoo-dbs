@@ -23,6 +23,6 @@ echo.
 
 echo =========================================
 echo  Setup Complete! 
-echo  You can now run 'dev.bat' to start the server.
+echo  You can now run 'dev.bat' or 'pdev.bat' to start the server.
 echo =========================================
 pause
