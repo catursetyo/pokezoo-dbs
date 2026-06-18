@@ -108,15 +108,27 @@ pokezoo-be/
    ```
 
 3. **Run Full Setup (Install, Migrate, & Seed)**
-   We provide a `Makefile` to automate the entire setup process. This will install Python dependencies, create tables, and insert dummy data for both MySQL and MongoDB:
-   ```bash
-   make setup
-   ```
+   We provide a `Makefile` to automate the entire setup process. This will install Python dependencies, create tables, dan insert dummy data for both MySQL and MongoDB:
+   - **For Linux/Mac (or Windows with WSL/Git Bash):**
+     ```bash
+     make setup
+     ```
+   - **For Windows (Command Prompt / PowerShell):**
+     Double-click `setup.bat` or run:
+     ```cmd
+     setup.bat
+     ```
 
 4. **Start the Development Server**
-   ```bash
-   make dev
-   ```
+   - **For Linux/Mac:**
+     ```bash
+     make dev
+     ```
+   - **For Windows:**
+     Double-click `dev.bat` or run:
+     ```cmd
+     dev.bat
+     ```
 
 5. **Access the Application**
    Open your browser and navigate to `http://localhost:8000`
