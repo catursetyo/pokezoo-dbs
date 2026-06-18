@@ -4,7 +4,7 @@ DB_USER ?= root
 DB_NAME ?= pokezoo
 
 dev:
-	python -m uvicorn app.main:app --reload
+	python3 -m uvicorn app.main:app --reload
 
 migrate:
 	@echo "Running MySQL schema migration..."
