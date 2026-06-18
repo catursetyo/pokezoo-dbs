@@ -22,13 +22,10 @@ TRUNCATE TABLE users;
 SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO users (username, password, role) VALUES
-('admin_oak',       'password123', 'admin'),
 ('admin_jenny',     'password123', 'admin'),
-('keeper_brock',    'password123', 'keeper'),
 ('keeper_misty',    'password123', 'keeper'),
 ('keeper_tracey',   'password123', 'keeper'),
 ('keeper_erika',    'password123', 'keeper'),
-('visitor_ash',     'password123', 'visitor'),
 ('visitor_serena',  'password123', 'visitor'),
 ('visitor_goh',     'password123', 'visitor'),
 ('visitor_lillie',  'password123', 'visitor'),
@@ -240,14 +237,6 @@ INSERT INTO feeding_schedules (pokemon_id, keeper_id, food_id, feeding_time, sta
 ((SELECT pokemon_id FROM pokemon WHERE nickname = 'Nova'),    (SELECT keeper_id FROM keepers WHERE name = 'Erika'),  (SELECT food_id FROM foods WHERE food_name = 'Sitrus Berry Pack'), '2026-06-14 09:00:00', 'completed'),
 ((SELECT pokemon_id FROM pokemon WHERE nickname = 'Ember'),   (SELECT keeper_id FROM keepers WHERE name = 'Misty'),  (SELECT food_id FROM foods WHERE food_name = 'Charcoal Crunch'),   '2026-06-13 12:00:00', 'missed'),
 ((SELECT pokemon_id FROM pokemon WHERE nickname = 'Shadow'),  (SELECT keeper_id FROM keepers WHERE name = 'Tracey'), (SELECT food_id FROM foods WHERE food_name = 'Mystic Mineral'),    '2026-06-13 22:00:00', 'missed');
-
-INSERT INTO tickets (visitor_id, visit_date, ticket_type, payment_method, purchase_date, price, status) VALUES
-((SELECT visitor_id FROM visitors WHERE name = 'Ash Ketchum'), '2026-06-15', 'VIP Pass',          'Credit Card', '2026-06-14 09:15:00', 75.00, 'active'),
-((SELECT visitor_id FROM visitors WHERE name = 'Ash Ketchum'), '2026-05-20', 'General Admission', 'Debit Card',  '2026-05-20 08:30:00', 25.00, 'used'),
-((SELECT visitor_id FROM visitors WHERE name = 'Serena'),      '2026-06-15', 'General Admission', 'PayPal',      '2026-06-14 10:30:00', 25.00, 'active'),
-((SELECT visitor_id FROM visitors WHERE name = 'Goh'),         '2026-06-16', 'Student',           'PayPal',      '2026-06-14 11:20:00', 10.00, 'active'),
-((SELECT visitor_id FROM visitors WHERE name = 'Lillie'),      '2026-06-15', 'VIP Pass',          'Credit Card', '2026-06-13 15:45:00', 75.00, 'used'),
-((SELECT visitor_id FROM visitors WHERE name = 'Clemont'),     '2026-06-17', 'General Admission', 'Debit Card',  '2026-06-14 16:10:00', 25.00, 'cancelled');
 
 INSERT INTO pokemon_interactions (ticket_id, pokemon_id, interaction_type, interaction_time, notes) VALUES
 ((SELECT ticket_id FROM tickets t JOIN visitors v ON t.visitor_id = v.visitor_id WHERE v.name = 'Ash Ketchum' AND t.visit_date = '2026-06-15' AND t.ticket_type = 'VIP Pass'),
