@@ -22,10 +22,13 @@ TRUNCATE TABLE users;
 SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO users (username, password, role) VALUES
+('admin_oak',       'password123', 'admin'),
 ('admin_jenny',     'password123', 'admin'),
+('keeper_brock',    'password123', 'keeper'),
 ('keeper_misty',    'password123', 'keeper'),
 ('keeper_tracey',   'password123', 'keeper'),
 ('keeper_erika',    'password123', 'keeper'),
+('visitor_ash',     'password123', 'visitor'),
 ('visitor_serena',  'password123', 'visitor'),
 ('visitor_goh',     'password123', 'visitor'),
 ('visitor_lillie',  'password123', 'visitor'),
