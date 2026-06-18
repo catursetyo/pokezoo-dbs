@@ -2,7 +2,7 @@
 
 PokeZOO is a hybrid database management system built for a university final project. It simulates a Pokémon zoo ecosystem using both relational (MySQL) and non-relational (MongoDB) databases.
 
-## Technology Stack
+## Tech Stack
 - **Backend:** Python FastAPI
 - **Relational DB:** MySQL via `PyMySQL` driver using raw SQL queries
 - **Non-Relational DB:** MongoDB via `Motor` async driver
