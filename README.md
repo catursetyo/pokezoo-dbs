@@ -147,4 +147,5 @@ If you imported `schema.sql`, you can log in using:
 And if you import `seed.sql`, you can get dozens of data like `pokemons`, `pokemon_types`, `habitats`, `foods`, etc.
 
 In addition, you can import `mongo_seed.js` to get `visitor_reviews`, `pokemon_behavior_logs`, and `incident_reports` data.
+
 ---
