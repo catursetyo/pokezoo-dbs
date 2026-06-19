@@ -30,6 +30,16 @@
                     <option value="Cave" {% if edit_item and edit_item.habitat_type == 'Cave' %}selected{% endif %}>Cave</option>
                 </select>
             </div>
+            {% if edit_item %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Status</label>
+                <select name="status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2 bg-white">
+                    <option value="Active" {% if edit_item.status == 'Active' %}selected{% endif %}>Active</option>
+                    <option value="Maintenance" {% if edit_item.status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                    <option value="Closed" {% if edit_item.status == 'Closed' %}selected{% endif %}>Closed</option>
+                </select>
+            </div>
+            {% endif %}     
             <div>
                 <label class="block text-sm font-medium text-gray-700">Capacity</label>
                 <input type="number" name="capacity" value="{{ edit_item.capacity if edit_item else '10' }}" min="1" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border p-2">

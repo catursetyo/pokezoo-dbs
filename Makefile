@@ -26,7 +26,7 @@ mongoseed:
 	mongosh $(MONGO_DB_NAME) database/mongo_seed.js
 
 install:
-	pip install -r requirements.txt --break-system-packages
+	pip install -r requirements.txt
 
 setup: install createdb migrate seed mongoseed
 	@echo "Setup complete! You can now run 'make dev' to start the server."
